@@ -2,20 +2,35 @@ package com.omrsheetscanner
 
 import android.Manifest.permission.CAMERA
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.omrsheetscanner.Constants.BLACK
+import com.omrsheetscanner.Constants.BLUE
+import com.omrsheetscanner.Constants.BOTTOM_Y
+import com.omrsheetscanner.Constants.COUNTOUR_IDX
+import com.omrsheetscanner.Constants.GAUSSIAN_KERNEL_SIZE
+import com.omrsheetscanner.Constants.GAUSSIAN_SIGMA
+import com.omrsheetscanner.Constants.HIGHT_BOX
+import com.omrsheetscanner.Constants.LEFT_X
+import com.omrsheetscanner.Constants.MAX_AREA
+import com.omrsheetscanner.Constants.MAX_RATIO
+import com.omrsheetscanner.Constants.MIN_AREA
+import com.omrsheetscanner.Constants.MIN_RATIO
+import com.omrsheetscanner.Constants.PERCENT_OF_PERIMETER
+import com.omrsheetscanner.Constants.SQUARE_POINTS
+import com.omrsheetscanner.Constants.THICKNESS_BOX
+import com.omrsheetscanner.Constants.THRESHOLD_CANNY
+import com.omrsheetscanner.Constants.TOP_RIGHT_X
+import com.omrsheetscanner.Constants.WIDTH_BOX
 import com.omrsheetscanner.databinding.ActivityCameraBinding
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.OpenCVLoader
-import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
+import org.opencv.imgproc.Imgproc.rectangle
 
 
 class CameraActivity : AppCompatActivity(),
@@ -72,80 +87,104 @@ class CameraActivity : AppCompatActivity(),
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame): Mat {
         val frame = inputFrame.rgba()
 
+        // Create 4 rectangles
+        val quadrants = createQuadrants()
+
+        //Draw each rectangle on the screen
+        drawRectangles(frame, quadrants)
+
+        for (q in quadrants) {
+
+            //Get a subframe from the quadrant
+            val subFrame = frame.submat(q)
+
+            //Pre process frame
+            val preProcessedFrame = preProcessFrame(subFrame)
+
+            //Get contours in the frame
+            val contours = getContours(preProcessedFrame)
+
+            //Get squares
+            val squares = findSquares(contours)
+
+            //Draw a contour around the square
+            Imgproc.drawContours(
+                subFrame,
+                squares,
+                COUNTOUR_IDX,
+                BLUE,
+                THICKNESS_BOX
+            )
+        }
+
+        return frame
+    }
+
+    private fun drawRectangles(frame: Mat, quadrants: Array<Rect>) {
+        quadrants.forEach {
+            rectangle(frame, it, BLACK, THICKNESS_BOX)
+        }
+    }
+
+    private fun createQuadrants(): Array<Rect> {
+        val q1 = Rect(TOP_RIGHT_X, LEFT_X, WIDTH_BOX, HIGHT_BOX)
+        val q2 = Rect(TOP_RIGHT_X, TOP_RIGHT_X, WIDTH_BOX, HIGHT_BOX)
+        val q3 = Rect(BOTTOM_Y, TOP_RIGHT_X, WIDTH_BOX, HIGHT_BOX)
+        val q4 = Rect(BOTTOM_Y, LEFT_X, WIDTH_BOX, HIGHT_BOX)
+        return arrayOf(q1, q2, q3, q4)
+    }
+
+    private fun getContours(preProcessedFrame: Mat): MutableList<MatOfPoint> {
+        val contours = mutableListOf<MatOfPoint>()
+        Imgproc.findContours(
+            preProcessedFrame,
+            contours,
+            Mat(),
+            Imgproc.RETR_LIST,
+            Imgproc.CHAIN_APPROX_SIMPLE
+        )
+        return contours
+    }
+
+    private fun preProcessFrame(subFrame: Mat): Mat {
         // Convert the image to grayscale
         val grayMat = Mat()
-        Imgproc.cvtColor(frame, grayMat, Imgproc.COLOR_BGR2GRAY)
+        Imgproc.cvtColor(subFrame, grayMat, Imgproc.COLOR_BGR2GRAY)
 
         // Apply a Gaussian blur to reduce noise
         val blurredMat = Mat()
-        val kSize = Size(5.0, 5.0)
-        Imgproc.GaussianBlur(grayMat, blurredMat, kSize, 0.0)
+        Imgproc.GaussianBlur(grayMat, blurredMat, GAUSSIAN_KERNEL_SIZE, GAUSSIAN_SIGMA)
 
         // Apply Canny edge detection to find edges
-        val threshold1 = 50.0
-        val threshold2 = 200.0
         val cannyMat = Mat()
-        Imgproc.Canny(blurredMat, cannyMat, threshold1, threshold2)
+        Imgproc.Canny(blurredMat, cannyMat, THRESHOLD_CANNY, THRESHOLD_CANNY)
+        return cannyMat
+    }
 
-        // Find contours in the image
-        val contours = mutableListOf<MatOfPoint>()
-        val hierarchy = Mat()
-        Imgproc.findContours(
-            cannyMat,
-            contours,
-            hierarchy,
-            Imgproc.RETR_EXTERNAL,
-            Imgproc.CHAIN_APPROX_SIMPLE
-        )
-
-        // Filter the contours to find squares
+    private fun findSquares(
+        contours: MutableList<MatOfPoint>
+    ): MutableList<MatOfPoint> {
         val squares = mutableListOf<MatOfPoint>()
+
         for (contour in contours) {
+            val matOfPoint2f = MatOfPoint2f()
+            contour.convertTo(matOfPoint2f, CvType.CV_32F)
+
+            val perimeter = Imgproc.arcLength(matOfPoint2f, true)
+
             val approxCurve = MatOfPoint2f()
-            val epsilon = 0.02 * Imgproc.arcLength(MatOfPoint2f(*contour.toArray()), true)
-            Imgproc.approxPolyDP(MatOfPoint2f(*contour.toArray()), approxCurve, epsilon, true)
-            if (approxCurve.toArray().size == 4) {
-                val rect = Imgproc.boundingRect(contour)
-                val aspectRatio = rect.width.toDouble() / rect.height.toDouble()
-                val x = rect.x
-                val y = rect.y
-                val w = rect.width
-                val h = rect.height
-                val centerX = x + w / 2
-                val centerY = y + h / 2
-                val maxDist =
-                    minOf(centerX, centerY, frame.width() - centerX, frame.height() - centerY)
-                if (aspectRatio in 0.9..1.1 && maxDist >= 50) {
+            Imgproc.approxPolyDP(matOfPoint2f, approxCurve, PERCENT_OF_PERIMETER * perimeter, true)
+
+            if (approxCurve.toArray().size == SQUARE_POINTS) {
+                val boundingRect = Imgproc.boundingRect(contour)
+                val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
+                val area = boundingRect.area()
+
+                if (aspectRatio in MIN_RATIO..MAX_RATIO && area in MIN_AREA..MAX_AREA) {
                     squares.add(contour)
                 }
             }
         }
-
-        val bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888)
-        Utils.matToBitmap(frame, bitmap)
-
-        if (squares.size == 4) {
-            runOnUiThread {
-                binding.javaCameraView.disableView()
-
-                val builder = AlertDialog.Builder(this)
-                    .create()
-                val view = layoutInflater.inflate(R.layout.actvity_preview, null)
-                builder.setView(view)
-
-                view.findViewById<ImageView>(R.id.preview).setImageBitmap(bitmap)
-
-                builder.setCanceledOnTouchOutside(true)
-
-                builder.setOnCancelListener {
-                    binding.javaCameraView.enableView()
-                }
-                builder.show()
-            }
-        }
-
-        Imgproc.drawContours(frame, squares, -1, Scalar(0.0, 255.0, 0.0), 3)
-
-        return frame
+        return squares
     }
 }
