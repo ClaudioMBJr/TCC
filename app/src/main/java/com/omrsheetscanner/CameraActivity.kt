@@ -1,42 +1,40 @@
 package com.omrsheetscanner
 
 import android.Manifest.permission.CAMERA
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.omrsheetscanner.Constants.BLACK
-import com.omrsheetscanner.Constants.BLUE
-import com.omrsheetscanner.Constants.BOTTOM_Y
 import com.omrsheetscanner.Constants.COUNTOUR_IDX
-import com.omrsheetscanner.Constants.GAUSSIAN_KERNEL_SIZE
-import com.omrsheetscanner.Constants.GAUSSIAN_SIGMA
-import com.omrsheetscanner.Constants.HIGHT_BOX
-import com.omrsheetscanner.Constants.LEFT_X
-import com.omrsheetscanner.Constants.MAX_AREA
+import com.omrsheetscanner.Constants.GREEN
 import com.omrsheetscanner.Constants.MAX_RATIO
-import com.omrsheetscanner.Constants.MIN_AREA
 import com.omrsheetscanner.Constants.MIN_RATIO
 import com.omrsheetscanner.Constants.PERCENT_OF_PERIMETER
 import com.omrsheetscanner.Constants.SQUARE_POINTS
 import com.omrsheetscanner.Constants.THICKNESS_BOX
-import com.omrsheetscanner.Constants.THRESHOLD_CANNY
-import com.omrsheetscanner.Constants.TOP_RIGHT_X
-import com.omrsheetscanner.Constants.WIDTH_BOX
 import com.omrsheetscanner.databinding.ActivityCameraBinding
+import java.io.File
+import java.io.FileOutputStream
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.OpenCVLoader
-import org.opencv.core.*
+import org.opencv.android.Utils
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.MatOfPoint
+import org.opencv.core.MatOfPoint2f
 import org.opencv.imgproc.Imgproc
-import org.opencv.imgproc.Imgproc.rectangle
 
 
 class CameraActivity : AppCompatActivity(),
     CameraBridgeViewBase.CvCameraViewListener2 {
 
     private lateinit var binding: ActivityCameraBinding
+
+    private var imageFound = false
 
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -87,51 +85,41 @@ class CameraActivity : AppCompatActivity(),
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame): Mat {
         val frame = inputFrame.rgba()
 
-        // Create 4 rectangles
-        val quadrants = createQuadrants()
+        if (!imageFound) {
 
-        //Draw each rectangle on the screen
-        drawRectangles(frame, quadrants)
+            val preProcessedFrame = preProcessFrame(frame)
 
-        for (q in quadrants) {
-
-            //Get a subframe from the quadrant
-            val subFrame = frame.submat(q)
-
-            //Pre process frame
-            val preProcessedFrame = preProcessFrame(subFrame)
-
-            //Get contours in the frame
             val contours = getContours(preProcessedFrame)
 
-            //Get squares
             val squares = findSquares(contours)
 
-            //Draw a contour around the square
             Imgproc.drawContours(
-                subFrame,
+                frame,
                 squares,
                 COUNTOUR_IDX,
-                BLUE,
+                GREEN,
                 THICKNESS_BOX
             )
+
+            if (squares.size == 4) {
+                imageFound = true
+
+                val bitmap =
+                    Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888)
+                Utils.matToBitmap(frame, bitmap)
+
+                val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
+                val outputStream = FileOutputStream(bitmapFile)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                outputStream.close()
+
+                val intent = Intent(this, PreviewActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         return frame
-    }
-
-    private fun drawRectangles(frame: Mat, quadrants: Array<Rect>) {
-        quadrants.forEach {
-            rectangle(frame, it, BLACK, THICKNESS_BOX)
-        }
-    }
-
-    private fun createQuadrants(): Array<Rect> {
-        val q1 = Rect(TOP_RIGHT_X, LEFT_X, WIDTH_BOX, HIGHT_BOX)
-        val q2 = Rect(TOP_RIGHT_X, TOP_RIGHT_X, WIDTH_BOX, HIGHT_BOX)
-        val q3 = Rect(BOTTOM_Y, TOP_RIGHT_X, WIDTH_BOX, HIGHT_BOX)
-        val q4 = Rect(BOTTOM_Y, LEFT_X, WIDTH_BOX, HIGHT_BOX)
-        return arrayOf(q1, q2, q3, q4)
     }
 
     private fun getContours(preProcessedFrame: Mat): MutableList<MatOfPoint> {
@@ -147,18 +135,17 @@ class CameraActivity : AppCompatActivity(),
     }
 
     private fun preProcessFrame(subFrame: Mat): Mat {
-        // Convert the image to grayscale
         val grayMat = Mat()
         Imgproc.cvtColor(subFrame, grayMat, Imgproc.COLOR_BGR2GRAY)
 
-        // Apply a Gaussian blur to reduce noise
-        val blurredMat = Mat()
-        Imgproc.GaussianBlur(grayMat, blurredMat, GAUSSIAN_KERNEL_SIZE, GAUSSIAN_SIGMA)
+        val thresh = Mat()
+        Imgproc.threshold(grayMat, thresh, 50.0, 255.0, Imgproc.THRESH_BINARY)
 
-        // Apply Canny edge detection to find edges
-        val cannyMat = Mat()
-        Imgproc.Canny(blurredMat, cannyMat, THRESHOLD_CANNY, THRESHOLD_CANNY)
-        return cannyMat
+        val kernel = Mat.ones(5, 5, CvType.CV_8UC1)
+        val closedImage = Mat()
+        Imgproc.morphologyEx(thresh, closedImage, Imgproc.MORPH_CLOSE, kernel)
+
+        return closedImage
     }
 
     private fun findSquares(
@@ -173,18 +160,28 @@ class CameraActivity : AppCompatActivity(),
             val perimeter = Imgproc.arcLength(matOfPoint2f, true)
 
             val approxCurve = MatOfPoint2f()
-            Imgproc.approxPolyDP(matOfPoint2f, approxCurve, PERCENT_OF_PERIMETER * perimeter, true)
+            Imgproc.approxPolyDP(
+                matOfPoint2f,
+                approxCurve,
+                PERCENT_OF_PERIMETER * perimeter,
+                true
+            )
 
             if (approxCurve.toArray().size == SQUARE_POINTS) {
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
-                val area = boundingRect.area()
 
-                if (aspectRatio in MIN_RATIO..MAX_RATIO && area in MIN_AREA..MAX_AREA) {
+                if (aspectRatio in MIN_RATIO..MAX_RATIO && boundingRect.area() > 100)
                     squares.add(contour)
-                }
             }
         }
+
         return squares
     }
+
+    override fun onResume() {
+        super.onResume()
+        imageFound = false
+    }
+
 }
