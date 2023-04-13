@@ -26,6 +26,9 @@ import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
+import org.opencv.core.Point
+import org.opencv.core.Rect
+import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
 
@@ -104,9 +107,58 @@ class CameraActivity : AppCompatActivity(),
             if (squares.size == 4) {
                 imageFound = true
 
+                val boundingRect = Imgproc.boundingRect(squares[0])
+                val topLeft =
+                    Point(boundingRect.x.toDouble() + boundingRect.width, boundingRect.y.toDouble())
+
+//                val boundingRect2 = Imgproc.boundingRect(squares[1])
+//                val bottomLeft = Point(boundingRect2.x.toDouble(), boundingRect2.y.toDouble())
+//
+//                val boundingRect3 = Imgproc.boundingRect(squares[2])
+//                val topRight = Point(
+//                    boundingRect3.x.toDouble() + boundingRect3.width,
+//                    boundingRect3.y.toDouble() + boundingRect3.height
+//                )
+
+                val boundingRect4 = Imgproc.boundingRect(squares[3])
+                val bottomRight = Point(
+                    boundingRect4.x.toDouble(),
+                    boundingRect4.y.toDouble() + boundingRect.height
+                )
+
+//                Imgproc.circle(frame, topLeft, 1, GREEN, 5)
+//                Imgproc.circle(frame, bottomLeft, 1, GREEN, 5)
+//                Imgproc.circle(frame, topRight, 1, GREEN, 5)
+//                Imgproc.circle(frame, bottomRight, 1, GREEN, 5)
+//
+//                Imgproc.line(frame, topLeft, bottomLeft, GREEN, 5)
+//                Imgproc.line(frame, topLeft, topRight, GREEN, 5)
+//                Imgproc.line(frame, topRight, bottomRight, GREEN, 5)
+//                Imgproc.line(frame, bottomRight, bottomLeft, GREEN, 5)
+
+                val rect = Rect(topLeft, bottomRight)
+                val region = frame.submat(rect)
+
+                val resizedFrame = Mat(Size(1024.0, 768.0), CvType.CV_8UC3)
+
+                // Resize the input frame to the target size using bilinear interpolation
+                Imgproc.resize(
+                    region,
+                    resizedFrame,
+                    Size(1024.0, 768.0),
+                    0.0,
+                    0.0,
+                    Imgproc.INTER_LINEAR
+                )
+
+
                 val bitmap =
-                    Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888)
-                Utils.matToBitmap(frame, bitmap)
+                    Bitmap.createBitmap(
+                        resizedFrame.cols(),
+                        resizedFrame.rows(),
+                        Bitmap.Config.ARGB_8888
+                    )
+                Utils.matToBitmap(resizedFrame, bitmap)
 
                 val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
                 val outputStream = FileOutputStream(bitmapFile)
@@ -139,7 +191,7 @@ class CameraActivity : AppCompatActivity(),
         Imgproc.cvtColor(subFrame, grayMat, Imgproc.COLOR_BGR2GRAY)
 
         val thresh = Mat()
-        Imgproc.threshold(grayMat, thresh, 50.0, 255.0, Imgproc.THRESH_BINARY)
+        Imgproc.threshold(grayMat, thresh, 100.0, 255.0, Imgproc.THRESH_BINARY)
 
         val kernel = Mat.ones(5, 5, CvType.CV_8UC1)
         val closedImage = Mat()
@@ -171,7 +223,7 @@ class CameraActivity : AppCompatActivity(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in MIN_RATIO..MAX_RATIO && boundingRect.area() > 100)
+                if (aspectRatio in MIN_RATIO..MAX_RATIO && boundingRect.area() > 1500)
                     squares.add(contour)
             }
         }
