@@ -3,7 +3,10 @@ package com.omrsheetscanner
 import org.opencv.core.Scalar
 
 object Constants {
-    val GREEN = Scalar(60.0, 179.0, 113.1)
+    val GREEN = Scalar(0.0, 255.0, 0.0)
+    val BLUE = Scalar(0.0, 0.0, 255.0)
+    val RED = Scalar(255.0, 0.0, 0.0)
+    val YELLOW = Scalar(255.0, 255.0, 0.0)
     val COUNTOUR_IDX = -1
     val THICKNESS_BOX = 2
 

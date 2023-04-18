@@ -57,10 +57,13 @@ class CameraActivity : AppCompatActivity(),
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (cameraPermissionIsGranted())
-            activateOpenCVCameraView()
-        else
-            requestPermission.launch(CAMERA)
+        val intent = Intent(this, PreviewActivity::class.java)
+        startActivity(intent)
+//
+//        if (cameraPermissionIsGranted())
+//            activateOpenCVCameraView()
+//        else
+//            requestPermission.launch(CAMERA)
     }
 
     private fun cameraPermissionIsGranted() =
@@ -125,7 +128,7 @@ class CameraActivity : AppCompatActivity(),
                     boundingRect4.x.toDouble(),
                     boundingRect4.y.toDouble() + boundingRect.height
                 )
-
+//
 //                Imgproc.circle(frame, topLeft, 1, GREEN, 5)
 //                Imgproc.circle(frame, bottomLeft, 1, GREEN, 5)
 //                Imgproc.circle(frame, topRight, 1, GREEN, 5)
@@ -137,28 +140,28 @@ class CameraActivity : AppCompatActivity(),
 //                Imgproc.line(frame, bottomRight, bottomLeft, GREEN, 5)
 
                 val rect = Rect(topLeft, bottomRight)
+//
                 val region = frame.submat(rect)
-
-                val resizedFrame = Mat(Size(1024.0, 768.0), CvType.CV_8UC3)
-
-                // Resize the input frame to the target size using bilinear interpolation
-                Imgproc.resize(
-                    region,
-                    resizedFrame,
-                    Size(1024.0, 768.0),
-                    0.0,
-                    0.0,
-                    Imgproc.INTER_LINEAR
-                )
+//
+//                val resizedFrame = Mat(Size(1024.0, 768.0), CvType.CV_8UC3)
+//                // Resize the input frame to the target size using bilinear interpolation
+//                Imgproc.resize(
+//                    region,
+//                    resizedFrame,
+//                    Size(1024.0, 768.0),
+//                    0.0,
+//                    0.0,
+//                    Imgproc.INTER_LINEAR
+//                )
 
 
                 val bitmap =
                     Bitmap.createBitmap(
-                        resizedFrame.cols(),
-                        resizedFrame.rows(),
+                        region.cols(),
+                        region.rows(),
                         Bitmap.Config.ARGB_8888
                     )
-                Utils.matToBitmap(resizedFrame, bitmap)
+                Utils.matToBitmap(region, bitmap)
 
                 val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
                 val outputStream = FileOutputStream(bitmapFile)
