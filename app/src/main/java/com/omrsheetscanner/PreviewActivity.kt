@@ -4,6 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.omrsheetscanner.Constants.BLUE
+import com.omrsheetscanner.Constants.GREEN
+import com.omrsheetscanner.Constants.RED
+import com.omrsheetscanner.Constants.YELLOW
 import com.omrsheetscanner.databinding.ActvityPreviewBinding
 import java.io.File
 import java.io.FileInputStream
@@ -42,28 +46,28 @@ class PreviewActivity : AppCompatActivity() {
             val boundingRect = Imgproc.boundingRect(it)
             val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-            if (boundingRect.area() in 100.0..200.0 && aspectRatio in 0.9..1.1)
+            if (boundingRect.area() > 200.0 && aspectRatio in 0.6..0.9)
                 bubbles.add(it)
         }
 
         val regions =
-            bubbles.sortedBy { Imgproc.boundingRect(it).y }.sortedBy { Imgproc.boundingRect(it).x }
+            bubbles.sortedBy { Imgproc.boundingRect(it).tl().x }
                 .chunked(5)
 
-        val sortedRegions = mutableListOf<List<MatOfPoint>>()
+//        val sortedRegions = mutableListOf<List<MatOfPoint>>()
+//
+//        for (i in (col - 1) downTo 0) {
+//            for (j in 0 until row) {
+//                sortedRegions.add(regions[(j * col) + i])
+//            }
+//        }
 
-        for (i in (col - 1) downTo 0) {
-            for (j in 0 until row) {
-                sortedRegions.add(regions[(j * col) + i])
-            }
-        }
-
-        sortedRegions.forEachIndexed { index, matOfPoints ->
+        regions.forEachIndexed { index, matOfPoints ->
             val color = when (index % 4) {
-                0 -> Constants.GREEN
-                1 -> Constants.BLUE
-                2 -> Constants.RED
-                else -> Constants.YELLOW
+                0 -> GREEN
+                1 -> BLUE
+                2 -> RED
+                else -> YELLOW
             }
 
             Imgproc.drawContours(
@@ -124,7 +128,7 @@ class PreviewActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-//        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
+        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
     }
 
 }

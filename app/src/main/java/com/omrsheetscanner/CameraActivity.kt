@@ -6,16 +6,18 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.omrsheetscanner.Constants.BLUE
 import com.omrsheetscanner.Constants.COUNTOUR_IDX
 import com.omrsheetscanner.Constants.GREEN
-import com.omrsheetscanner.Constants.MAX_RATIO
-import com.omrsheetscanner.Constants.MIN_RATIO
 import com.omrsheetscanner.Constants.PERCENT_OF_PERIMETER
+import com.omrsheetscanner.Constants.RED
 import com.omrsheetscanner.Constants.SQUARE_POINTS
 import com.omrsheetscanner.Constants.THICKNESS_BOX
+import com.omrsheetscanner.Constants.YELLOW
 import com.omrsheetscanner.databinding.ActivityCameraBinding
 import java.io.File
 import java.io.FileOutputStream
@@ -28,7 +30,6 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Rect
-import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
 
@@ -54,16 +55,18 @@ class CameraActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+//
         val intent = Intent(this, PreviewActivity::class.java)
         startActivity(intent)
-//
-//        if (cameraPermissionIsGranted())
-//            activateOpenCVCameraView()
-//        else
-//            requestPermission.launch(CAMERA)
+
+        if (cameraPermissionIsGranted())
+            activateOpenCVCameraView()
+        else
+            requestPermission.launch(CAMERA)
     }
 
     private fun cameraPermissionIsGranted() =
@@ -73,6 +76,7 @@ class CameraActivity : AppCompatActivity(),
         binding.javaCameraView.apply {
             setCameraPermissionGranted()
             setCvCameraViewListener(this@CameraActivity)
+            setMaxFrameSize(1280, 720)
             enableView()
         }
     }
@@ -99,69 +103,80 @@ class CameraActivity : AppCompatActivity(),
 
             val squares = findSquares(contours)
 
-            Imgproc.drawContours(
-                frame,
-                squares,
-                COUNTOUR_IDX,
-                GREEN,
-                THICKNESS_BOX
-            )
+//            Imgproc.drawContours(
+//                frame,
+//                squares,
+//                COUNTOUR_IDX,
+//                GREEN,
+//                THICKNESS_BOX
+//            )
 
             if (squares.size == 4) {
                 imageFound = true
 
-                val boundingRect = Imgproc.boundingRect(squares[0])
-                val topLeft =
-                    Point(boundingRect.x.toDouble() + boundingRect.width, boundingRect.y.toDouble())
+                val scrRects = mutableListOf<Rect>().apply {
+                    add(Imgproc.boundingRect(squares[0]))
+                    add(Imgproc.boundingRect(squares[1]))
+                    add(Imgproc.boundingRect(squares[2]))
+                    add(Imgproc.boundingRect(squares[3]))
+                }.sortedBy { it.x + it.y }
 
-//                val boundingRect2 = Imgproc.boundingRect(squares[1])
-//                val bottomLeft = Point(boundingRect2.x.toDouble(), boundingRect2.y.toDouble())
-//
-//                val boundingRect3 = Imgproc.boundingRect(squares[2])
-//                val topRight = Point(
-//                    boundingRect3.x.toDouble() + boundingRect3.width,
-//                    boundingRect3.y.toDouble() + boundingRect3.height
-//                )
-
-                val boundingRect4 = Imgproc.boundingRect(squares[3])
-                val bottomRight = Point(
-                    boundingRect4.x.toDouble(),
-                    boundingRect4.y.toDouble() + boundingRect.height
+                val topLeft = scrRects.first().br()
+                val bottomLeft = Point(
+                    scrRects[1].br().x,
+                    scrRects[1].tl().y
                 )
-//
-//                Imgproc.circle(frame, topLeft, 1, GREEN, 5)
-//                Imgproc.circle(frame, bottomLeft, 1, GREEN, 5)
-//                Imgproc.circle(frame, topRight, 1, GREEN, 5)
-//                Imgproc.circle(frame, bottomRight, 1, GREEN, 5)
-//
-//                Imgproc.line(frame, topLeft, bottomLeft, GREEN, 5)
-//                Imgproc.line(frame, topLeft, topRight, GREEN, 5)
-//                Imgproc.line(frame, topRight, bottomRight, GREEN, 5)
-//                Imgproc.line(frame, bottomRight, bottomLeft, GREEN, 5)
+                val topRight = Point(
+                    scrRects[2].tl().x,
+                    scrRects[2].br().y
+                )
+                val bottomRight = scrRects.last().tl()
 
-                val rect = Rect(topLeft, bottomRight)
-//
+//                Imgproc.circle(frame, topLeft, 5, GREEN, 5)
+//                Imgproc.circle(frame, bottomLeft, 5, BLUE, 5)
+//                Imgproc.circle(frame, topRight, 5, YELLOW, 5)
+//                Imgproc.circle(frame, bottomRight, 5, RED, 5)
+
+                val rect = Rect(
+                    topLeft,
+                    bottomRight
+                )
                 val region = frame.submat(rect)
-//
-//                val resizedFrame = Mat(Size(1024.0, 768.0), CvType.CV_8UC3)
-//                // Resize the input frame to the target size using bilinear interpolation
-//                Imgproc.resize(
-//                    region,
-//                    resizedFrame,
-//                    Size(1024.0, 768.0),
-//                    0.0,
-//                    0.0,
-//                    Imgproc.INTER_LINEAR
-//                )
 
+                val srcPoints = mutableListOf<Point>().apply {
+                    add(topLeft)
+                    add(bottomLeft)
+                    add(topRight)
+                    add(bottomRight)
+                }
+
+                val dstPoints = mutableListOf<Point>().apply {
+                    add(Point(0.0, 0.0))
+                    add(Point(0.0, frame.rows().toDouble()))
+                    add(Point(frame.cols().toDouble(), 0.0))
+                    add(Point(frame.cols().toDouble(), frame.rows().toDouble()))
+                }
+
+                val transformationMatrix = Imgproc.getPerspectiveTransform(
+                    srcPoints.toMat(),
+                    dstPoints.toMat()
+                )
+
+                val outputImage = Mat()
+                Imgproc.warpPerspective(
+                    frame,
+                    outputImage,
+                    transformationMatrix,
+                    frame.size()
+                )
 
                 val bitmap =
                     Bitmap.createBitmap(
-                        region.cols(),
-                        region.rows(),
+                        outputImage.cols(),
+                        outputImage.rows(),
                         Bitmap.Config.ARGB_8888
                     )
-                Utils.matToBitmap(region, bitmap)
+                Utils.matToBitmap(outputImage, bitmap)
 
                 val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
                 val outputStream = FileOutputStream(bitmapFile)
@@ -175,6 +190,14 @@ class CameraActivity : AppCompatActivity(),
         }
 
         return frame
+    }
+
+    fun List<Point>.toMat(): Mat {
+        val mat = Mat(this.size, 1, CvType.CV_32FC2)
+        this.forEachIndexed { index, point ->
+            mat.put(index, 0, point.x, point.y)
+        }
+        return mat
     }
 
     private fun getContours(preProcessedFrame: Mat): MutableList<MatOfPoint> {
@@ -226,7 +249,7 @@ class CameraActivity : AppCompatActivity(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in MIN_RATIO..MAX_RATIO && boundingRect.area() > 1500)
+                if (aspectRatio in 0.4..0.5 && boundingRect.area() > 4000)
                     squares.add(contour)
             }
         }
