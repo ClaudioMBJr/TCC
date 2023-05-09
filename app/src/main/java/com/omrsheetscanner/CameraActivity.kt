@@ -10,14 +10,11 @@ import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.omrsheetscanner.Constants.BLUE
 import com.omrsheetscanner.Constants.COUNTOUR_IDX
 import com.omrsheetscanner.Constants.GREEN
 import com.omrsheetscanner.Constants.PERCENT_OF_PERIMETER
-import com.omrsheetscanner.Constants.RED
 import com.omrsheetscanner.Constants.SQUARE_POINTS
 import com.omrsheetscanner.Constants.THICKNESS_BOX
-import com.omrsheetscanner.Constants.YELLOW
 import com.omrsheetscanner.databinding.ActivityCameraBinding
 import java.io.File
 import java.io.FileOutputStream
@@ -59,9 +56,9 @@ class CameraActivity : AppCompatActivity(),
 
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
-//
-        val intent = Intent(this, PreviewActivity::class.java)
-        startActivity(intent)
+
+//        val intent = Intent(this, PreviewActivity::class.java)
+//        startActivity(intent)
 
         if (cameraPermissionIsGranted())
             activateOpenCVCameraView()
@@ -103,16 +100,15 @@ class CameraActivity : AppCompatActivity(),
 
             val squares = findSquares(contours)
 
-//            Imgproc.drawContours(
-//                frame,
-//                squares,
-//                COUNTOUR_IDX,
-//                GREEN,
-//                THICKNESS_BOX
-//            )
+            Imgproc.drawContours(
+                frame,
+                squares,
+                COUNTOUR_IDX,
+                GREEN,
+                THICKNESS_BOX
+            )
 
             if (squares.size == 4) {
-                imageFound = true
 
                 val scrRects = mutableListOf<Rect>().apply {
                     add(Imgproc.boundingRect(squares[0]))
@@ -122,67 +118,57 @@ class CameraActivity : AppCompatActivity(),
                 }.sortedBy { it.x + it.y }
 
                 val topLeft = scrRects.first().br()
-                val bottomLeft = Point(
-                    scrRects[1].br().x,
-                    scrRects[1].tl().y
-                )
-                val topRight = Point(
-                    scrRects[2].tl().x,
-                    scrRects[2].br().y
-                )
                 val bottomRight = scrRects.last().tl()
 
-//                Imgproc.circle(frame, topLeft, 5, GREEN, 5)
-//                Imgproc.circle(frame, bottomLeft, 5, BLUE, 5)
-//                Imgproc.circle(frame, topRight, 5, YELLOW, 5)
-//                Imgproc.circle(frame, bottomRight, 5, RED, 5)
-
-                val rect = Rect(
-                    topLeft,
-                    bottomRight
+                val bottomLeft = Point(
+                    topLeft.x,
+                    bottomRight.y
                 )
+
+                val topRight = Point(
+                    bottomRight.x,
+                    topLeft.y
+                )
+
+                Log.d("Points", "topLeft x = ${topLeft.x} y = ${topLeft.y}")
+                Log.d("Points", "bottomLeft x = ${bottomLeft.x} y = ${bottomLeft.y}")
+                Log.d("Points", "topRight x = ${topRight.x} y = ${topRight.y}")
+                Log.d("Points", "bottomRight x = ${bottomRight.x} y = ${bottomRight.y}")
+
+                val rect = Rect(topLeft, bottomRight)
                 val region = frame.submat(rect)
 
-                val srcPoints = mutableListOf<Point>().apply {
-                    add(topLeft)
-                    add(bottomLeft)
-                    add(topRight)
-                    add(bottomRight)
-                }
+                val srcPoints = MatOfPoint2f(
+                    topLeft,
+                    bottomLeft,
+                    topRight,
+                    bottomRight
+                )
 
-                val dstPoints = mutableListOf<Point>().apply {
-                    add(Point(0.0, 0.0))
-                    add(Point(0.0, frame.rows().toDouble()))
-                    add(Point(frame.cols().toDouble(), 0.0))
-                    add(Point(frame.cols().toDouble(), frame.rows().toDouble()))
-                }
+                val dstPoints = MatOfPoint2f(
+                    Point(0.0, 0.0),
+                    Point(0.0, frame.height().toDouble()),
+                    Point(frame.width().toDouble(), 0.0),
+                    Point(frame.width().toDouble(), frame.height().toDouble()),
+                )
 
                 val transformationMatrix = Imgproc.getPerspectiveTransform(
-                    srcPoints.toMat(),
-                    dstPoints.toMat()
+                    srcPoints,
+                    dstPoints
                 )
+                val size = frame.size()
 
                 val outputImage = Mat()
                 Imgproc.warpPerspective(
                     frame,
                     outputImage,
                     transformationMatrix,
-                    frame.size()
+                    size
                 )
 
-                val bitmap =
-                    Bitmap.createBitmap(
-                        outputImage.cols(),
-                        outputImage.rows(),
-                        Bitmap.Config.ARGB_8888
-                    )
-                Utils.matToBitmap(outputImage, bitmap)
+                createBitmap(outputImage)
 
-                val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
-                val outputStream = FileOutputStream(bitmapFile)
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                outputStream.close()
+                imageFound = true
 
                 val intent = Intent(this, PreviewActivity::class.java)
                 startActivity(intent)
@@ -192,12 +178,20 @@ class CameraActivity : AppCompatActivity(),
         return frame
     }
 
-    fun List<Point>.toMat(): Mat {
-        val mat = Mat(this.size, 1, CvType.CV_32FC2)
-        this.forEachIndexed { index, point ->
-            mat.put(index, 0, point.x, point.y)
-        }
-        return mat
+    private fun createBitmap(mat: Mat) {
+        val bitmap =
+            Bitmap.createBitmap(
+                mat.cols(),
+                mat.rows(),
+                Bitmap.Config.ARGB_8888
+            )
+        Utils.matToBitmap(mat, bitmap)
+
+        val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
+        val outputStream = FileOutputStream(bitmapFile)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
     }
 
     private fun getContours(preProcessedFrame: Mat): MutableList<MatOfPoint> {
@@ -249,7 +243,7 @@ class CameraActivity : AppCompatActivity(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in 0.4..0.5 && boundingRect.area() > 4000)
+                if (aspectRatio in 0.5..0.7 && boundingRect.area() > 8000)
                     squares.add(contour)
             }
         }

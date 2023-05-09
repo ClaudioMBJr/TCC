@@ -3,6 +3,7 @@ package com.omrsheetscanner
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.omrsheetscanner.Constants.BLUE
 import com.omrsheetscanner.Constants.GREEN
@@ -28,60 +29,77 @@ class PreviewActivity : AppCompatActivity() {
         binding = ActvityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
-        val inputStream = FileInputStream(bitmapFile)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream.close()
+        try {
+            val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
+            val inputStream = FileInputStream(bitmapFile)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
 
-        val mat = Mat()
-        Utils.bitmapToMat(bitmap, mat)
+            val mat = Mat()
+            Utils.bitmapToMat(bitmap, mat)
 
-        val gray = preProcessFrame(mat)
+            val gray = preProcessFrame(mat)
 
-        val contours = getContours(gray)
+            val contours = getContours(gray)
 
-        val bubbles = mutableListOf<MatOfPoint>()
+            val bubbles = mutableListOf<MatOfPoint>()
 
-        contours.forEach {
-            val boundingRect = Imgproc.boundingRect(it)
-            val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
+            contours.forEach {
+                val boundingRect = Imgproc.boundingRect(it)
+                val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-            if (boundingRect.area() > 200.0 && aspectRatio in 0.6..0.9)
-                bubbles.add(it)
-        }
-
-        val regions =
-            bubbles.sortedBy { Imgproc.boundingRect(it).tl().x }
-                .chunked(5)
-
-//        val sortedRegions = mutableListOf<List<MatOfPoint>>()
-//
-//        for (i in (col - 1) downTo 0) {
-//            for (j in 0 until row) {
-//                sortedRegions.add(regions[(j * col) + i])
-//            }
-//        }
-
-        regions.forEachIndexed { index, matOfPoints ->
-            val color = when (index % 4) {
-                0 -> GREEN
-                1 -> BLUE
-                2 -> RED
-                else -> YELLOW
+                if (boundingRect.area() > 800.0 && aspectRatio in 0.9..1.2)
+                    bubbles.add(it)
             }
 
-            Imgproc.drawContours(
-                mat,
-                matOfPoints,
-                Constants.COUNTOUR_IDX,
-                color,
-                Constants.THICKNESS_BOX
-            )
+            val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(20)
+
+            val questions = mutableListOf<List<MatOfPoint>>()
+
+            lines.forEach { line ->
+                val sectorByLine = line.sortedBy { Imgproc.boundingRect(it).x }.chunked(5)
+                sectorByLine.forEach { question ->
+                    questions.add(question)
+                }
+            }
+
+//            for (i in (col - 1) downTo 0) {
+//                for (j in 0 until row) {
+//                    sortedRegions.add(regions[(j * col) + i])
+//                }
+//            }
+
+            questions.forEachIndexed { index, matOfPoints ->
+                val color = when (index % 4) {
+                    0 -> GREEN
+                    1 -> BLUE
+                    2 -> RED
+                    else -> YELLOW
+                }
+
+                Imgproc.drawContours(
+                    mat,
+                    matOfPoints,
+                    Constants.COUNTOUR_IDX,
+                    color,
+                    Constants.THICKNESS_BOX
+                )
+            }
+
+            val processedBitmap = getFinalBitMap(mat)
+
+            binding.preview.setImageBitmap(processedBitmap)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AlertDialog.Builder(this)
+                .setMessage("Imagem inválida")
+                .setPositiveButton(
+                    "OK"
+                ) { _, _ -> finish() }
+                .create()
+                .show()
         }
-
-        val processedBitmap = getFinalBitMap(mat)
-
-        binding.preview.setImageBitmap(processedBitmap)
     }
 
     private fun getFinalBitMap(mat: Mat): Bitmap? {
@@ -104,7 +122,7 @@ class PreviewActivity : AppCompatActivity() {
         Imgproc.threshold(
             grayMat,
             thresh,
-            0.0,
+            100.0,
             255.0,
             (Imgproc.THRESH_BINARY_INV or Imgproc.THRESH_OTSU)
         )
