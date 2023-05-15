@@ -3,19 +3,22 @@ package com.omrsheetscanner
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.omrsheetscanner.Constants.BLUE
 import com.omrsheetscanner.Constants.GREEN
-import com.omrsheetscanner.Constants.RED
-import com.omrsheetscanner.Constants.YELLOW
 import com.omrsheetscanner.databinding.ActvityPreviewBinding
 import java.io.File
 import java.io.FileInputStream
 import org.opencv.android.Utils
+import org.opencv.core.Core
+import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
+import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
+import org.opencv.imgproc.Imgproc.drawContours
+
 
 class PreviewActivity : AppCompatActivity() {
 
@@ -23,6 +26,8 @@ class PreviewActivity : AppCompatActivity() {
 
     private val row = 10
     private val col = 4
+    private val marksByLine = 20
+    private val marksByQuestion = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,39 +57,72 @@ class PreviewActivity : AppCompatActivity() {
                     bubbles.add(it)
             }
 
-            val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(20)
+            //Cria uma lista com cada linha
+            val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(marksByLine)
 
             val questions = mutableListOf<List<MatOfPoint>>()
 
+            //Adiciona na lista questions agrupamentos de 5 retirados de cada linha
             lines.forEach { line ->
-                val sectorByLine = line.sortedBy { Imgproc.boundingRect(it).x }.chunked(5)
-                sectorByLine.forEach { question ->
+                val lineBySector =
+                    line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
+                lineBySector.forEach { question ->
                     questions.add(question)
                 }
             }
 
-//            for (i in (col - 1) downTo 0) {
-//                for (j in 0 until row) {
-//                    sortedRegions.add(regions[(j * col) + i])
-//                }
-//            }
+            val sortedQuestions = mutableListOf<List<MatOfPoint>>()
 
-            questions.forEachIndexed { index, matOfPoints ->
-                val color = when (index % 4) {
-                    0 -> GREEN
-                    1 -> BLUE
-                    2 -> RED
-                    else -> YELLOW
+            //Ordena a matrix
+            for (i in 0 until col) {
+                for (j in 0 until row) {
+                    sortedQuestions.add(questions[(j * col) + i])
                 }
-
-                Imgproc.drawContours(
-                    mat,
-                    matOfPoints,
-                    Constants.COUNTOUR_IDX,
-                    color,
-                    Constants.THICKNESS_BOX
-                )
             }
+
+            val userAnswer = mutableListOf<MatOfPoint>()
+
+            sortedQuestions.forEachIndexed { indexQuestion, questions ->
+                val filledMarks = mutableListOf<MatOfPoint>()
+                questions.forEachIndexed { index, mark ->
+
+                    if (filledMarks.size > 1) {
+                        filledMarks.clear()
+                        return
+                    }
+
+                    val markContour = mutableListOf(mark)
+
+                    val mask = Mat.zeros(gray.size(), CvType.CV_8UC1)
+                    drawContours(mask, markContour, -1, Scalar(255.0), -1)
+
+                    val maskedImage = Mat()
+                    Core.bitwise_and(gray, mask, maskedImage)
+
+                    val total = Core.countNonZero(maskedImage)
+
+                    Log.d(
+                        "Avaliação",
+                        "Questão ${indexQuestion + 1} opção ${index + 1} contagem de pixels diferente de 0 = $total"
+                    )
+
+                    if (total > 800)
+                        filledMarks.add(mark)
+
+                }
+                if (filledMarks.isNotEmpty()) {
+                    userAnswer.add(filledMarks.first())
+                    filledMarks.clear()
+                }
+            }
+
+            drawContours(
+                mat,
+                userAnswer,
+                Constants.COUNTOUR_IDX,
+                GREEN,
+                Constants.THICKNESS_BOX
+            )
 
             val processedBitmap = getFinalBitMap(mat)
 
@@ -101,6 +139,7 @@ class PreviewActivity : AppCompatActivity() {
                 .show()
         }
     }
+
 
     private fun getFinalBitMap(mat: Mat): Bitmap? {
         val processedBitmap =
@@ -146,7 +185,7 @@ class PreviewActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
+//        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
     }
 
 }
