@@ -57,8 +57,8 @@ class CameraActivity : AppCompatActivity(),
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val intent = Intent(this, PreviewActivity::class.java)
-        startActivity(intent)
+//        val intent = Intent(this, PreviewActivity::class.java)
+//        startActivity(intent)
 
         if (cameraPermissionIsGranted())
             activateOpenCVCameraView()

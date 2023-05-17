@@ -3,10 +3,10 @@ package com.omrsheetscanner
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.omrsheetscanner.Constants.GREEN
+import com.omrsheetscanner.Constants.RED
 import com.omrsheetscanner.databinding.ActvityPreviewBinding
 import java.io.File
 import java.io.FileInputStream
@@ -26,8 +26,10 @@ class PreviewActivity : AppCompatActivity() {
 
     private val row = 10
     private val col = 4
+    private val totalQuestions = 40
     private val marksByLine = 20
     private val marksByQuestion = 5
+    private val correctAnswer = listOf(0, 2, 4, 0, 1, 4, 4)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +73,9 @@ class PreviewActivity : AppCompatActivity() {
                 }
             }
 
+            if (questions.size != totalQuestions)
+                throw Exception()
+
             val sortedQuestions = mutableListOf<List<MatOfPoint>>()
 
             //Ordena a matrix
@@ -80,47 +85,55 @@ class PreviewActivity : AppCompatActivity() {
                 }
             }
 
-            val userAnswer = mutableListOf<MatOfPoint>()
+            val userCorrectAnswer = mutableListOf<MatOfPoint>()
+            val userWrongAnswer = mutableListOf<MatOfPoint>()
 
-            sortedQuestions.forEachIndexed { indexQuestion, questions ->
-                val filledMarks = mutableListOf<MatOfPoint>()
-                questions.forEachIndexed { index, mark ->
+            sortedQuestions.forEachIndexed { indexQuestion, question ->
+                var userAnswer: MatOfPoint? = null
+                kotlin.run breaker@{
+                    question.forEachIndexed { index, mark ->
+                        val markContour = mutableListOf(mark)
 
-                    if (filledMarks.size > 1) {
-                        filledMarks.clear()
-                        return
+                        val mask = Mat.zeros(gray.size(), CvType.CV_8UC1)
+                        drawContours(mask, markContour, -1, Scalar(255.0), -1)
+
+                        val maskedImage = Mat()
+                        Core.bitwise_and(gray, mask, maskedImage)
+
+                        val total = Core.countNonZero(maskedImage)
+
+                        if (total > 800) {
+                            if (userAnswer == null) {
+                                userAnswer = mark
+                                if (index == correctAnswer[indexQuestion])
+                                    userCorrectAnswer.add(mark)
+                                else userWrongAnswer.add(mark)
+                            } else {
+                                question.forEach {
+                                    userCorrectAnswer.remove(it)
+                                    userWrongAnswer.remove(it)
+                                }
+                                return@breaker
+                            }
+                        }
                     }
-
-                    val markContour = mutableListOf(mark)
-
-                    val mask = Mat.zeros(gray.size(), CvType.CV_8UC1)
-                    drawContours(mask, markContour, -1, Scalar(255.0), -1)
-
-                    val maskedImage = Mat()
-                    Core.bitwise_and(gray, mask, maskedImage)
-
-                    val total = Core.countNonZero(maskedImage)
-
-                    Log.d(
-                        "Avaliação",
-                        "Questão ${indexQuestion + 1} opção ${index + 1} contagem de pixels diferente de 0 = $total"
-                    )
-
-                    if (total > 800)
-                        filledMarks.add(mark)
-
                 }
-                if (filledMarks.isNotEmpty()) {
-                    userAnswer.add(filledMarks.first())
-                    filledMarks.clear()
-                }
+                userAnswer = null
             }
 
             drawContours(
                 mat,
-                userAnswer,
+                userCorrectAnswer,
                 Constants.COUNTOUR_IDX,
                 GREEN,
+                Constants.THICKNESS_BOX
+            )
+
+            drawContours(
+                mat,
+                userWrongAnswer,
+                Constants.COUNTOUR_IDX,
+                RED,
                 Constants.THICKNESS_BOX
             )
 
@@ -185,7 +198,7 @@ class PreviewActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-//        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
+        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
     }
 
 }
