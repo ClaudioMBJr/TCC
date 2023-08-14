@@ -1,12 +1,13 @@
-package com.omrsheetscanner
+package com.omrsheetscanner.my_exam_preview
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.omrsheetscanner.Constants.GREEN
-import com.omrsheetscanner.Constants.RED
+import com.omrsheetscanner.common.Constants
+import com.omrsheetscanner.common.Constants.GREEN
+import com.omrsheetscanner.common.Constants.RED
 import com.omrsheetscanner.databinding.ActvityPreviewBinding
 import java.io.File
 import java.io.FileInputStream

@@ -1,4 +1,4 @@
-package com.omrsheetscanner
+package com.omrsheetscanner.my_exam_camera
 
 import android.Manifest.permission.CAMERA
 import android.content.Intent
@@ -10,12 +10,14 @@ import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.omrsheetscanner.Constants.COUNTOUR_IDX
-import com.omrsheetscanner.Constants.GREEN
-import com.omrsheetscanner.Constants.PERCENT_OF_PERIMETER
-import com.omrsheetscanner.Constants.SQUARE_POINTS
-import com.omrsheetscanner.Constants.THICKNESS_BOX
+import com.omrsheetscanner.common.Constants
+import com.omrsheetscanner.common.Constants.COUNTOUR_IDX
+import com.omrsheetscanner.common.Constants.GREEN
+import com.omrsheetscanner.common.Constants.PERCENT_OF_PERIMETER
+import com.omrsheetscanner.common.Constants.SQUARE_POINTS
+import com.omrsheetscanner.common.Constants.THICKNESS_BOX
 import com.omrsheetscanner.databinding.ActivityCameraBinding
+import com.omrsheetscanner.my_exam_preview.PreviewActivity
 import java.io.File
 import java.io.FileOutputStream
 import org.opencv.android.CameraBridgeViewBase

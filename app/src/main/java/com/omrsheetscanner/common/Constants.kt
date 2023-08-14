@@ -1,4 +1,4 @@
-package com.omrsheetscanner
+package com.omrsheetscanner.common
 
 import org.opencv.core.Scalar
 
