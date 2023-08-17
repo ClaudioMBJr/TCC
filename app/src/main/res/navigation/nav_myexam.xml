@@ -9,5 +9,14 @@
         android:id="@+id/fragmentHome"
         android:name="com.omrsheetscanner.home.FragmentHome"
         android:label="FragmentHome"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_fragmentHome_to_newExamFormFragment"
+            app:destination="@id/newExamFormFragment" />
+    </fragment>
+    <fragment
+        tools:layout="@layout/fragment_my_exam_form"
+        android:id="@+id/newExamFormFragment"
+        android:name="com.omrsheetscanner.new_exam_form.NewExamFormFragment"
+        android:label="NewExamFormFragment" />
 </navigation>

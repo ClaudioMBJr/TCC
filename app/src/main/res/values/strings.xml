@@ -9,6 +9,29 @@
     <string name="text_label_exam_description">Descrição:</string>
     <string name="text_label_amount_of_questions">Quantidade de questões:</string>
     <string name="text_label_amount_of_options">Quantidade de alternativas:</string>
-    <string name="text_label_score_per_question">Nota por questão:</string>
-    <string name="label_text_max_score">Nota máxima:</string>
+    <string name="label_label_text_max_score">Nota máxima:</string>
+    <string name="text_warning_fill_exam_title">O nome da prova precisa ser preenchido</string>
+    <string name="text_warning_invalid_score">A nota máxima da prova precisa ser maior do que 0</string>
+    <string name="text_default_max_score">10</string>
+    <string name="text_invalid_max_score">0</string>
+
+    <string-array name="amount_options">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="amount_questions">
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>70</item>
+        <item>80</item>
+        <item>90</item>
+        <item>100</item>
+    </string-array>
 </resources>
