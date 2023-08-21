@@ -3,6 +3,6 @@
 3    package="org.opencv" >
 4
 5    <uses-sdk android:minSdkVersion="21" />
-5-->C:\Users\claud\Desktop\TCC\OMRSheetScanner\openCV\java\AndroidManifest.xml
+5-->C:\Users\claud\Documents\TCC\openCV\java\AndroidManifest.xml
 6
 7</manifest>

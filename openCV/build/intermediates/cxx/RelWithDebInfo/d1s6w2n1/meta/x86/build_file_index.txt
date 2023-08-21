@@ -1,1 +1,0 @@
-C:\Users\claud\Desktop\TCC\OMRSheetScanner\openCV\libcxx_helper\CMakeLists.txt

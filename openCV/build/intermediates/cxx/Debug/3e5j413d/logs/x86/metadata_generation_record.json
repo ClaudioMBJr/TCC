@@ -2,7 +2,7 @@
   {
     "level_": 0,
     "message_": "Start JSON generation. Platform version: 21 min SDK version: x86",
-    "file_": "C:\\Users\\claud\\Desktop\\TCC\\OMRSheetScanner\\openCV\\libcxx_helper\\CMakeLists.txt",
+    "file_": "C:\\Users\\claud\\Documents\\TCC\\openCV\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|x86",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,
@@ -11,12 +11,12 @@
       "fieldsDescending": {}
     },
     "memoizedSize": -1,
-    "memoizedHashCode": 1981570371
+    "memoizedHashCode": -630001874
   },
   {
     "level_": 0,
-    "message_": "JSON \u0027C:\\Users\\claud\\Desktop\\TCC\\OMRSheetScanner\\openCV\\.cxx\\Debug\\3e5j413d\\x86\\android_gradle_build.json\u0027 was up-to-date",
-    "file_": "C:\\Users\\claud\\Desktop\\TCC\\OMRSheetScanner\\openCV\\libcxx_helper\\CMakeLists.txt",
+    "message_": "JSON \u0027C:\\Users\\claud\\Documents\\TCC\\openCV\\.cxx\\Debug\\3e5j413d\\x86\\android_gradle_build.json\u0027 was up-to-date",
+    "file_": "C:\\Users\\claud\\Documents\\TCC\\openCV\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|x86",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,
@@ -25,12 +25,12 @@
       "fieldsDescending": {}
     },
     "memoizedSize": -1,
-    "memoizedHashCode": -493637227
+    "memoizedHashCode": -1852535145
   },
   {
     "level_": 0,
     "message_": "JSON generation completed without problems",
-    "file_": "C:\\Users\\claud\\Desktop\\TCC\\OMRSheetScanner\\openCV\\libcxx_helper\\CMakeLists.txt",
+    "file_": "C:\\Users\\claud\\Documents\\TCC\\openCV\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|x86",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,
@@ -39,6 +39,6 @@
       "fieldsDescending": {}
     },
     "memoizedSize": -1,
-    "memoizedHashCode": 1773459536
+    "memoizedHashCode": -838112709
   }
 ]

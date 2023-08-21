@@ -16,6 +16,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
@@ -63,27 +64,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/titleExamData" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/examNameEditLayout"
+            <EditText
+                android:id="@+id/examNameEditText"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="6dp"
-                app:boxBackgroundColor="@drawable/bg_white_16dp"
-                app:errorEnabled="false"
+                android:background="@drawable/bg_white_16dp"
+                android:inputType="text"
+                android:textColor="@color/primaryColor"
+                android:textSize="14sp"
+                android:textStyle="normal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelExamName">
-
-                <EditText
-                    android:id="@+id/examNameEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_white_16dp"
-                    android:gravity="center"
-                    android:inputType="text"
-                    android:textColor="@color/primaryColor" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintTop_toBottomOf="@id/labelExamName" />
 
             <TextView
                 android:id="@+id/labelExamDescription"
@@ -96,28 +90,22 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/examNameEditLayout" />
+                app:layout_constraintTop_toBottomOf="@id/examNameEditText" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/examDescriptionEditLayout"
+            <EditText
+                android:id="@+id/examDescriptionEditText"
                 android:layout_width="0dp"
                 android:layout_height="80dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="6dp"
-                app:boxBackgroundColor="@drawable/bg_white_16dp"
-                app:errorEnabled="false"
+                android:background="@drawable/bg_white_16dp"
+                android:inputType="textCapWords"
+                android:textColor="@color/primaryColor"
+                android:textSize="14sp"
+                android:textStyle="normal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelExamDescription">
-
-                <EditText
-                    android:id="@+id/examDescriptionEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_white_16dp"
-                    android:inputType="textCapWords"
-                    android:textColor="@color/primaryColor" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintTop_toBottomOf="@id/labelExamDescription" />
 
             <TextView
                 android:id="@+id/labelAmountOfOptions"
@@ -146,7 +134,7 @@
                 android:spinnerMode="dropdown"
                 android:theme="@style/spinnerTheme"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/examDescriptionEditLayout" />
+                app:layout_constraintTop_toBottomOf="@id/examDescriptionEditText" />
 
             <TextView
                 android:id="@+id/labelAmountOfQuestion"
@@ -186,31 +174,27 @@
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/examMaxScoreEditText"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/examMaxScoreEditLayout"
-                app:layout_constraintBottom_toBottomOf="@id/examMaxScoreEditLayout" />
+                app:layout_constraintTop_toTopOf="@id/examMaxScoreEditText" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/examMaxScoreEditLayout"
+            <EditText
+                android:id="@+id/examMaxScoreEditText"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="30dp"
-                app:boxBackgroundColor="@drawable/bg_white_16dp"
-                app:errorEnabled="false"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/bg_white_16dp"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:maxLength="3"
+                android:text="@string/text_default_max_score"
+                android:textColor="@color/primaryColor"
+                android:textSize="14sp"
+                android:textStyle="normal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/spinnerAmountQuestions" >
-
-                <EditText
-                    android:id="@+id/examMaxScoreEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="@string/text_default_max_score"
-                    android:background="@drawable/bg_white_16dp"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/primaryColor" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintTop_toBottomOf="@id/spinnerAmountQuestions" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnContinue"

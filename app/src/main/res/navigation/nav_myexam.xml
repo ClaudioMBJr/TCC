@@ -7,16 +7,31 @@
 
     <fragment
         android:id="@+id/fragmentHome"
-        android:name="com.omrsheetscanner.home.FragmentHome"
+        android:name="com.omrsheetscanner.presentation.home.FragmentHome"
         android:label="FragmentHome"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_fragmentHome_to_newExamFormFragment"
             app:destination="@id/newExamFormFragment" />
     </fragment>
     <fragment
-        tools:layout="@layout/fragment_my_exam_form"
         android:id="@+id/newExamFormFragment"
-        android:name="com.omrsheetscanner.new_exam_form.NewExamFormFragment"
-        android:label="NewExamFormFragment" />
+        android:name="com.omrsheetscanner.presentation.new_exam_form.NewExamFormFragment"
+        android:label="NewExamFormFragment"
+        tools:layout="@layout/fragment_my_exam_form">
+        <action
+            android:id="@+id/action_newExamFormFragment_to_selectCorrectAnswersFragment"
+            app:destination="@id/selectCorrectAnswersFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectCorrectAnswersFragment"
+        android:name="com.omrsheetscanner.presentation.select_correct_answers.SelectCorrectAnswersFragment"
+        android:label="SelectCorrectAnswersFragment"
+        tools:layout="@layout/fragment_select_correct_answers">
+
+        <argument
+            android:name="myExam"
+            app:argType="com.omrsheetscanner.domain.model.MyExam"
+            app:nullable="false" />
+    </fragment>
 </navigation>

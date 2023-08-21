@@ -14,6 +14,10 @@
     <string name="text_warning_invalid_score">A nota máxima da prova precisa ser maior do que 0</string>
     <string name="text_default_max_score">10</string>
     <string name="text_invalid_max_score">0</string>
+    <string name="text_warning_all_options_must_be_chosen">Todas as opções devem ser escolhidas</string>
+    <string name="text_question_number">%s:</string>
+
+    <string name="arg_type_name_my_exam">MyExam</string>
 
     <string-array name="amount_options">
         <item>2</item>
