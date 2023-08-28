@@ -16,6 +16,10 @@
     <string name="text_invalid_max_score">0</string>
     <string name="text_warning_all_options_must_be_chosen">Todas as opções devem ser escolhidas</string>
     <string name="text_question_number">%s:</string>
+    <string name="text_search_exams">Buscar prova</string>
+    <string name="title_registered_exams">Provas cadastradas:</string>
+    <string name="text_couldnt_find_exams">Prova não encontrada</string>
+    <string name="title_my_exams">Minhas provas</string>
 
     <string name="arg_type_name_my_exam">MyExam</string>
 

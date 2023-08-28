@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_fragmentHome_to_newExamFormFragment"
             app:destination="@id/newExamFormFragment" />
+        <action
+            android:id="@+id/action_fragmentHome_to_myExamsFragment"
+            app:destination="@id/myExamsFragment" />
     </fragment>
     <fragment
         android:id="@+id/newExamFormFragment"
@@ -33,5 +36,11 @@
             android:name="myExam"
             app:argType="com.omrsheetscanner.domain.model.MyExam"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/myExamsFragment"
+        android:name="com.omrsheetscanner.presentation.my_exams.MyExamsFragment"
+        android:label="MyExamsFragment"
+        tools:layout="@layout/fragment_my_exams">
     </fragment>
 </navigation>

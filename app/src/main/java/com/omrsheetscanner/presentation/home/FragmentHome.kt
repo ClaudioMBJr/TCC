@@ -27,6 +27,10 @@ class FragmentHome : Fragment() {
         binding.btnCreateNewExam.setOnClickListener {
             findNavController().navigate(FragmentHomeDirections.actionFragmentHomeToNewExamFormFragment())
         }
+
+        binding.btnMyExams.setOnClickListener {
+            findNavController().navigate(FragmentHomeDirections.actionFragmentHomeToMyExamsFragment())
+        }
     }
 
     override fun onDestroy() {

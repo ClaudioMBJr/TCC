@@ -1,7 +1,7 @@
 package com.omrsheetscanner.domain.use_cases
 
 import com.omrsheetscanner.data.database.repository.ExamRepository
-import com.omrsheetscanner.domain.mapper.ExamEntityMapper.toExamEntity
+import com.omrsheetscanner.domain.mapper.ExamMapper.toExamEntity
 import com.omrsheetscanner.domain.model.MyExam
 import javax.inject.Inject
 
