@@ -8,6 +8,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.omrsheetscanner.databinding.FragmentMyExamsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -43,11 +44,14 @@ class MyExamsFragment : Fragment() {
         myExamsViewModel.myExams.observe(viewLifecycleOwner) {
             adapter = MyExamsAdapter(
                 exams = it.toMutableList(),
-                onExamClicked = {},
+                onExamClicked = {
+                    findNavController().navigate(MyExamsFragmentDirections.actionMyExamsFragmentToMyExamInfoFragment(it))
+                },
                 showNoResultsMessage = {
                     showNoResultsLabel(it)
                 })
             binding.examsRv.adapter = adapter
+            binding.textNoExams.isVisible = it.isEmpty()
         }
     }
 
@@ -70,7 +74,7 @@ class MyExamsFragment : Fragment() {
     }
 
     private fun showNoResultsLabel(isVisible: Boolean) {
-        binding.textNoExams.isVisible = isVisible
+        binding.textNoExamsSearch.isVisible = isVisible
     }
 
     override fun onDestroy() {

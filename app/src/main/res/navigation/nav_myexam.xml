@@ -36,11 +36,29 @@
             android:name="myExam"
             app:argType="com.omrsheetscanner.domain.model.MyExam"
             app:nullable="false" />
+        <action
+            android:id="@+id/action_selectCorrectAnswersFragment_to_myExamInfoFragment"
+            app:destination="@id/myExamInfoFragment"
+            app:popUpTo="@id/myExamsFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/myExamsFragment"
         android:name="com.omrsheetscanner.presentation.my_exams.MyExamsFragment"
         android:label="MyExamsFragment"
         tools:layout="@layout/fragment_my_exams">
+        <action
+            android:id="@+id/action_myExamsFragment_to_myExamInfoFragment"
+            app:destination="@id/myExamInfoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/myExamInfoFragment"
+        android:name="com.omrsheetscanner.presentation.my_exam_info.MyExamInfoFragment"
+        android:label="MyExamInfoFragment"
+        tools:layout="@layout/fragment_my_exam_info">
+        <argument
+            android:name="myExam"
+            app:argType="com.omrsheetscanner.domain.model.MyExam"
+            app:nullable="false" />
     </fragment>
 </navigation>

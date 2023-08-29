@@ -17,9 +17,16 @@
     <string name="text_warning_all_options_must_be_chosen">Todas as opções devem ser escolhidas</string>
     <string name="text_question_number">%s:</string>
     <string name="text_search_exams">Buscar prova</string>
+    <string name="text_search_student">Buscar aluno</string>
     <string name="title_registered_exams">Provas cadastradas:</string>
     <string name="text_couldnt_find_exams">Prova não encontrada</string>
+    <string name="text_couldnt_find_students">Aluno não encontrado não encontrada</string>
+    <string name="text_no_students">Nenhum aluno cadastrado</string>
+    <string name="text_no_exams">Nenhuma prova cadastrada</string>
     <string name="title_my_exams">Minhas provas</string>
+    <string name="text_btn_save_exam">Imprimir prova</string>
+    <string name="text_btn_review_exam">Corrigir prova</string>
+    <string name="text_btn_delete_exam">Excluir prova</string>
 
     <string name="arg_type_name_my_exam">MyExam</string>
 

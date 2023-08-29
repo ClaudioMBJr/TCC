@@ -2,36 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_marginBottom="16dp"
-    android:orientation="vertical"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_white_16dp">
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/bg_white_16dp"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/examTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="20sp"
         android:layout_marginHorizontal="8dp"
         android:layout_marginTop="8dp"
-        android:maxLines="1"
         android:ellipsize="end"
-        android:textStyle="bold"
+        android:gravity="center"
+        android:maxLines="1"
         android:textColor="@color/primaryColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
         tools:text="Matemática 2023/2" />
 
     <TextView
         android:id="@+id/examDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="16sp"
         android:layout_margin="8dp"
-        android:maxLines="2"
         android:ellipsize="end"
-        android:textStyle="normal"
+        android:gravity="center"
+        android:maxLines="2"
         android:textColor="@color/primaryColor"
+        android:textSize="16sp"
+        android:textStyle="normal"
         tools:text="Prova de  matemática para a recuperação da turma 6ºa" />
 
 </LinearLayout>
