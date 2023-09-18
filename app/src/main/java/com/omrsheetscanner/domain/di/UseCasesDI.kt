@@ -2,6 +2,7 @@ package com.omrsheetscanner.domain.di
 
 import com.omrsheetscanner.data.database.repository.ExamRepository
 import com.omrsheetscanner.data.database.repository.StudentRepository
+import com.omrsheetscanner.domain.use_cases.DeleteExamUseCase
 import com.omrsheetscanner.domain.use_cases.GetExamsUseCase
 import com.omrsheetscanner.domain.use_cases.GetStudentsUseCase
 import com.omrsheetscanner.domain.use_cases.SaveExamUseCase
@@ -33,5 +34,10 @@ object UseCasesDI {
     @Provides
     fun providesGetStudentUseCase(studentRepository: StudentRepository) =
         GetStudentsUseCase(studentRepository)
+
+    @ViewModelScoped
+    @Provides
+    fun providesDeleteExamUseCase(examRepository: ExamRepository, studentRepository: StudentRepository) =
+        DeleteExamUseCase(examRepository, studentRepository)
 
 }

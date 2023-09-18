@@ -5,7 +5,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.omrsheetscanner.data.database.entities.Student
-@Dao interface StudentDao {
+
+@Dao
+interface StudentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveStudent(student: Student)
@@ -14,4 +16,7 @@ import com.omrsheetscanner.data.database.entities.Student
         "SELECT * FROM student"
     )
     fun getAllStudents(): List<Student>
+
+    @Query("DELETE FROM student")
+    fun deleteAll()
 }

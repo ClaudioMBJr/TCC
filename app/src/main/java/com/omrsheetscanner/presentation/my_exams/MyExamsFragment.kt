@@ -77,8 +77,8 @@ class MyExamsFragment : Fragment() {
         binding.textNoExamsSearch.isVisible = isVisible
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 }

@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.databinding.FragmentMyExamInfoBinding
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class MyExamInfoFragment : Fragment() {
@@ -41,6 +44,34 @@ class MyExamInfoFragment : Fragment() {
         }
         binding.titleExam.text = args.myExam.title
         binding.descriptionExam.text = args.myExam.description
+
+        binding.btnReviewExam.setOnClickListener {
+            findNavController().navigate(
+                MyExamInfoFragmentDirections.actionMyExamInfoFragmentToCameraFragment(
+                    args.myExam
+                )
+            )
+        }
+
+        binding.btnDeleteExam.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Excluir prova")
+                .setMessage("Tem certeza que deseja excluir a avaliação?")
+                .setPositiveButton(
+                    "Excluir"
+                ) { _, _ ->
+                    myExamsInfoViewModel.deleteExam(args.myExam.id)
+                    findNavController().popBackStack()
+                }
+                .setNegativeButton("Cancelar") { _, _ -> }
+                .setCancelable(true)
+                .create()
+                .show()
+        }
+
+        binding.btnSaveExam.setOnClickListener {
+            convertXmlToPdf()
+        }
 
         observerStudentsList()
         configureSearchView()
@@ -81,8 +112,13 @@ class MyExamInfoFragment : Fragment() {
         binding.textNoStudentsSearch.isVisible = isVisible
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun convertXmlToPdf() {
+        PDFConverter().createPdf(requireContext(), requireActivity(), args.myExam)
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 }

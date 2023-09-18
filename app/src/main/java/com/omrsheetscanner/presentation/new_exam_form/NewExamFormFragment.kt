@@ -70,8 +70,8 @@ class NewExamFormFragment : Fragment() {
         ).show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 }

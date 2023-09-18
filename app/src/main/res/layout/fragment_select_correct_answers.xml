@@ -30,16 +30,17 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/answersRv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="20dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="20dp"
         android:clipToPadding="false"
-        android:paddingVertical="20dp"
+        android:paddingVertical="10dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@id/btnContinue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        tools:itemCount="100"
         tools:listitem="@layout/item_select_corret_answer" />
 
     <androidx.appcompat.widget.AppCompatButton

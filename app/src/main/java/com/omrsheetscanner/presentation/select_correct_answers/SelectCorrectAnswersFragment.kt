@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.omrsheetscanner.R
@@ -36,6 +37,10 @@ class SelectCorrectAnswersFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
         adapter = SelectCorrectAnswersAdapter(
             amountOfQuestions = args.myExam.questions,
             amountOfOptions = args.myExam.options
@@ -43,13 +48,10 @@ class SelectCorrectAnswersFragment : Fragment() {
 
         binding.answersRv.adapter = adapter
 
-        binding.toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
-
         binding.btnContinue.setOnClickListener {
             if (canContinue()) {
                 selectCorrectAnswersViewModel.saveExam(args.myExam.copy(examAnswers = adapter.selectedAnswers))
+                findNavController().navigate(SelectCorrectAnswersFragmentDirections.actionSelectCorrectAnswersFragmentToMyExamInfoFragment(selectCorrectAnswersViewModel.myExam))
             }
         }
     }
@@ -71,8 +73,9 @@ class SelectCorrectAnswersFragment : Fragment() {
         ).show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
+
 }

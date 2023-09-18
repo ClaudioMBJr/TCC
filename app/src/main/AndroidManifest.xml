@@ -9,6 +9,7 @@
         android:resizeable="true"
         android:smallScreens="true" />
 
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -30,6 +31,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OMRSheetScanner"
         tools:targetApi="31">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
         <activity
             android:name=".presentation.MainActivity"
             android:windowSoftInputMode="adjustPan|adjustResize"
@@ -39,9 +50,9 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.my_exam_preview.PreviewActivity" />
+        <activity android:name=".presentation.my_exam_preview.PreviewFragment" />
         <activity
-            android:name=".presentation.my_exam_camera.CameraActivity"
+            android:name=".presentation.my_exam_camera.CameraFragment"
             android:configChanges="keyboardHidden|orientation"
             android:exported="true"
             android:screenOrientation="landscape" />

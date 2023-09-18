@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">OMRSheetScanner</string>
     <string name="text_btn_create_new_exam">Nova prova</string>
+    <string name="text_exam_camera">Corrigir prova</string>
     <string name="text_btn_my_exams">Minhas provas</string>
     <string name="text_label_my_exam">MyExam</string>
     <string name="text_btn_continue">Continuar</string>
@@ -29,6 +30,12 @@
     <string name="text_btn_delete_exam">Excluir prova</string>
 
     <string name="arg_type_name_my_exam">MyExam</string>
+    <string name="btn_save_exam">Salvar</string>
+    <string name="btn_cancel_exam">Cancelar</string>
+    <string name="text_label_student_grade">Nota:</string>
+    <string name="text_label_student_name">Nome do aluno:</string>
+    <string name="title_delete_exam">Excluir prova</string>
+    <string name="message_delete_exam">Tem certeza que dejesa excluir a prova</string>
 
     <string-array name="amount_options">
         <item>2</item>

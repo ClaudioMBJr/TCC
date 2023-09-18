@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/white"
+    android:padding="20px">
+
+    <View
+        android:id="@+id/mark1"
+        android:layout_width="40px"
+        android:layout_height="80px"
+        android:background="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/mark2"
+        android:layout_width="40px"
+        android:layout_height="80px"
+        android:background="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/labelName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20px"
+        android:text="Nome:"
+        android:textColor="@android:color/black"
+        android:textSize="30px"
+        app:layout_constraintStart_toEndOf="@id/mark1"
+        app:layout_constraintTop_toBottomOf="@id/mark1" />
+
+    <View
+        android:layout_width="0px"
+        android:layout_height="2px"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@id/labelName"
+        app:layout_constraintEnd_toStartOf="@id/mark2"
+        app:layout_constraintStart_toEndOf="@id/labelName" />
+
+    <TextView
+        android:id="@+id/labelDate"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20px"
+        android:text="Data:"
+        android:textColor="@android:color/black"
+        android:textSize="30px"
+        app:layout_constraintStart_toEndOf="@id/mark1"
+        app:layout_constraintTop_toBottomOf="@id/labelName" />
+
+    <View
+        android:layout_width="300px"
+        android:layout_height="2px"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@id/labelDate"
+        app:layout_constraintStart_toEndOf="@id/labelDate" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="wrap_content"
+        android:id="@+id/answersRv"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_answer_px"
+        app:layout_constraintBottom_toBottomOf="@id/mark3"
+        android:layout_margin="20px"
+        app:layout_constraintEnd_toStartOf="@id/mark2"
+        app:layout_constraintStart_toEndOf="@id/mark1"
+        app:layout_constraintTop_toBottomOf="@id/labelDate" />
+
+    <View
+        android:id="@+id/mark3"
+        android:layout_width="40px"
+        android:layout_height="80px"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <View
+        android:id="@+id/mark4"
+        android:layout_width="40px"
+        android:layout_height="80px"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

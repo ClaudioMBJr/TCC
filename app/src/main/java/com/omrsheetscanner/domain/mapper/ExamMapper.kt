@@ -7,6 +7,7 @@ object ExamMapper {
 
     fun MyExam.toExamEntity() =
         Exam(
+            id = id,
             title = title,
             description = description,
             options = options,
@@ -17,6 +18,7 @@ object ExamMapper {
 
     fun Exam.toMyExam() =
         MyExam(
+            id = id,
             title = title,
             description = description,
             options = options,

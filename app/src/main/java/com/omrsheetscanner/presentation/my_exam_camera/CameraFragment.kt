@@ -1,25 +1,25 @@
 package com.omrsheetscanner.presentation.my_exam_camera
 
 import android.Manifest.permission.CAMERA
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.common.Constants
 import com.omrsheetscanner.common.Constants.COUNTOUR_IDX
 import com.omrsheetscanner.common.Constants.GREEN
 import com.omrsheetscanner.common.Constants.PERCENT_OF_PERIMETER
 import com.omrsheetscanner.common.Constants.SQUARE_POINTS
 import com.omrsheetscanner.common.Constants.THICKNESS_BOX
-import com.omrsheetscanner.databinding.ActivityCameraBinding
-import com.omrsheetscanner.presentation.my_exam_preview.PreviewActivity
-import java.io.File
-import java.io.FileOutputStream
+import com.omrsheetscanner.databinding.FragmentCameraBinding
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
@@ -30,12 +30,16 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
+import java.io.File
+import java.io.FileOutputStream
 
-
-class CameraActivity : AppCompatActivity(),
+class CameraFragment : Fragment(),
     CameraBridgeViewBase.CvCameraViewListener2 {
 
-    private lateinit var binding: ActivityCameraBinding
+    private var _binding: FragmentCameraBinding? = null
+    private val binding get() = _binding!!
+
+    private val args: CameraFragmentArgs by navArgs()
 
     private var imageFound = false
 
@@ -44,7 +48,7 @@ class CameraActivity : AppCompatActivity(),
             if (isGranted)
                 activateOpenCVCameraView()
             else
-                finish()
+                requireActivity().finish()
         }
 
     init {
@@ -52,15 +56,20 @@ class CameraActivity : AppCompatActivity(),
             Log.d("OpenCV", "OpenCV initialized")
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCameraBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        binding = ActivityCameraBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-//        val intent = Intent(this, PreviewActivity::class.java)
-//        startActivity(intent)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
 
         if (cameraPermissionIsGranted())
             activateOpenCVCameraView()
@@ -69,20 +78,18 @@ class CameraActivity : AppCompatActivity(),
     }
 
     private fun cameraPermissionIsGranted() =
-        ContextCompat.checkSelfPermission(baseContext, CAMERA) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(
+            requireContext(),
+            CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
 
     private fun activateOpenCVCameraView() {
         binding.javaCameraView.apply {
             setCameraPermissionGranted()
-            setCvCameraViewListener(this@CameraActivity)
+            setCvCameraViewListener(this@CameraFragment)
             setMaxFrameSize(1280, 720)
             enableView()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.javaCameraView.disableView()
     }
 
     override fun onCameraViewStarted(width: Int, height: Int) {
@@ -172,8 +179,11 @@ class CameraActivity : AppCompatActivity(),
 
                 imageFound = true
 
-                val intent = Intent(this, PreviewActivity::class.java)
-                startActivity(intent)
+                findNavController().navigate(
+                    CameraFragmentDirections.actionCameraFragmentToPreviewFragment(
+                        args.myExam
+                    )
+                )
             }
         }
 
@@ -189,7 +199,7 @@ class CameraActivity : AppCompatActivity(),
             )
         Utils.matToBitmap(mat, bitmap)
 
-        val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
+        val bitmapFile = File(requireActivity().applicationContext.cacheDir, Constants.FILE_NAME)
         val outputStream = FileOutputStream(bitmapFile)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         outputStream.flush()
@@ -256,6 +266,12 @@ class CameraActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         imageFound = false
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.javaCameraView.disableView()
+        _binding = null
     }
 
 }

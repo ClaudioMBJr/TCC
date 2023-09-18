@@ -11,4 +11,6 @@ class StudentRepository @Inject constructor(private val studentDao: StudentDao) 
 
     fun getAllStudent() =
         studentDao.getAllStudents()
+
+    fun deleteAll() = studentDao.deleteAll()
 }

@@ -17,4 +17,7 @@ interface ExamDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveExam(exam: Exam)
 
+    @Query("DELETE FROM exam where id =:examId")
+    fun deleteExamById(examId : Int)
+
 }

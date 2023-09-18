@@ -3,14 +3,17 @@ package com.omrsheetscanner.presentation.my_exam_preview
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.common.Constants
 import com.omrsheetscanner.common.Constants.GREEN
 import com.omrsheetscanner.common.Constants.RED
-import com.omrsheetscanner.databinding.ActvityPreviewBinding
-import java.io.File
-import java.io.FileInputStream
+import com.omrsheetscanner.databinding.FragmentPreviewBinding
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -19,26 +22,49 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 import org.opencv.imgproc.Imgproc.drawContours
+import java.io.File
+import java.io.FileInputStream
 
+class PreviewFragment : Fragment() {
 
-class PreviewActivity : AppCompatActivity() {
+    private var _binding: FragmentPreviewBinding? = null
+    private val binding get() = _binding!!
 
-    private lateinit var binding: ActvityPreviewBinding
+    private val args: PreviewFragmentArgs by navArgs()
 
     private val row = 10
-    private val col = 4
-    private val totalQuestions = 40
-    private val marksByLine = 20
-    private val marksByQuestion = 5
-    private val correctAnswer = listOf(0, 2, 4, 0, 1, 4, 4)
+    private val col = args.myExam.getColumns()
+    private val totalQuestions = args.myExam.questions
+    private val marksByQuestion = args.myExam.options
+    private val correctAnswer = args.myExam.examAnswers
+    private val marksByLine = marksByQuestion * col
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActvityPreviewBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentPreviewBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        reviewExam()
+
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
+        binding.btnCancel.setOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun reviewExam() {
         try {
-            val bitmapFile = File(applicationContext.cacheDir, Constants.FILE_NAME)
+            val bitmapFile =
+                File(requireActivity().applicationContext.cacheDir, Constants.FILE_NAME)
             val inputStream = FileInputStream(bitmapFile)
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream.close()
@@ -144,16 +170,15 @@ class PreviewActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(requireContext())
                 .setMessage("Imagem inválida")
                 .setPositiveButton(
                     "OK"
-                ) { _, _ -> finish() }
+                ) { _, _ -> requireActivity().finish() }
                 .create()
                 .show()
         }
     }
-
 
     private fun getFinalBitMap(mat: Mat): Bitmap? {
         val processedBitmap =
@@ -197,9 +222,10 @@ class PreviewActivity : AppCompatActivity() {
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        requireActivity().applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
+        _binding = null
     }
 
 }

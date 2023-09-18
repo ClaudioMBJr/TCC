@@ -2,10 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
     android:layout_gravity="center_horizontal"
+    android:gravity="center_horizontal"
     android:orientation="horizontal">
 
     <TextView
@@ -13,10 +13,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        app:layout_constraintHorizontal_bias="1"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="@id/answers"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/answers"
+        app:layout_constraintHorizontal_bias="1"
         app:layout_constraintTop_toTopOf="@id/answers"
         tools:text="0:" />
 
@@ -25,10 +25,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        app:layout_constraintHorizontal_bias="0"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/questionNumber"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <View
@@ -36,35 +35,35 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:background="@android:color/white" />
+            android:background="@drawable/circle_shape" />
 
         <View
             android:id="@+id/option02"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:background="@android:color/white" />
+            android:background="@drawable/circle_shape" />
 
         <View
             android:id="@+id/option03"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:background="@android:color/white" />
+            android:background="@drawable/circle_shape" />
 
         <View
             android:id="@+id/option04"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:background="@android:color/white" />
+            android:background="@drawable/circle_shape" />
 
         <View
             android:id="@+id/option05"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:background="@android:color/white" />
+            android:background="@drawable/circle_shape" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

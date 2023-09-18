@@ -11,4 +11,6 @@ class ExamRepository @Inject constructor(private val examDao: ExamDao) {
 
     suspend fun saveExam(exam: Exam) =
         examDao.saveExam(exam)
+
+    fun deleteExamById(examId : Int) = examDao.deleteExamById(examId)
 }

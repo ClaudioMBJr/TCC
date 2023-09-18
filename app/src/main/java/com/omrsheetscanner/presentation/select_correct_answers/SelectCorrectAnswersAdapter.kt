@@ -1,9 +1,11 @@
 package com.omrsheetscanner.presentation.select_correct_answers
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.RecyclerView
 import com.omrsheetscanner.R
 
@@ -77,18 +79,28 @@ class SelectCorrectAnswersAdapter(
     private fun View.selectedQuestion(viewHolder: ViewHolder, position: Int, correctAnswer: Int) {
         setOnClickListener {
             unselectPreviousQuestions(viewHolder, position)
-            background.setTint(context.getColor(android.R.color.black))
+            background = AppCompatResources.getDrawable(context, R.drawable.black_circle_shape)
             selectedAnswers[position] = correctAnswer
         }
     }
 
     private fun View.unselectPreviousQuestions(viewHolder: ViewHolder, position: Int) {
         when (selectedAnswers[position]) {
-            1 -> viewHolder.option01.background.setTint(context.getColor(android.R.color.white))
-            2 -> viewHolder.option02.background.setTint(context.getColor(android.R.color.white))
-            3 -> viewHolder.option03.background.setTint(context.getColor(android.R.color.white))
-            4 -> viewHolder.option04.background.setTint(context.getColor(android.R.color.white))
-            5 -> viewHolder.option05.background.setTint(context.getColor(android.R.color.white))
+            1 -> viewHolder.option01.background =
+                AppCompatResources.getDrawable(context, R.drawable.circle_shape)
+
+            2 -> viewHolder.option02.background =
+                AppCompatResources.getDrawable(context, R.drawable.circle_shape)
+
+            3 -> viewHolder.option03.background =
+                AppCompatResources.getDrawable(context, R.drawable.circle_shape)
+
+            4 -> viewHolder.option04.background =
+                AppCompatResources.getDrawable(context, R.drawable.circle_shape)
+
+            5 -> viewHolder.option05.background =
+                AppCompatResources.getDrawable(context, R.drawable.circle_shape)
+
             else -> return
         }
 
@@ -96,5 +108,9 @@ class SelectCorrectAnswersAdapter(
     }
 
     override fun getItemCount(): Int = amountOfQuestions
+
+    override fun getItemViewType(position: Int): Int {
+        return position
+    }
 
 }

@@ -60,5 +60,46 @@
             android:name="myExam"
             app:argType="com.omrsheetscanner.domain.model.MyExam"
             app:nullable="false" />
+        <action
+            android:id="@+id/action_myExamInfoFragment_to_cameraFragment"
+            app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_myExamInfoFragment_to_saveEditStudentFragment"
+            app:destination="@id/saveEditStudentFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.omrsheetscanner.presentation.my_exam_camera.CameraFragment"
+        android:label="fragment_camera"
+        tools:layout="@layout/fragment_camera">
+        <argument
+            android:name="myExam"
+            app:argType="com.omrsheetscanner.domain.model.MyExam"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_cameraFragment_to_previewFragment"
+            app:destination="@id/previewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/previewFragment"
+        android:name="com.omrsheetscanner.presentation.my_exam_preview.PreviewFragment"
+        android:label="fragment_preview"
+        tools:layout="@layout/fragment_preview">
+        <argument
+            android:name="myExam"
+            app:argType="com.omrsheetscanner.domain.model.MyExam"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_previewFragment_to_saveEditStudentFragment"
+            app:destination="@id/saveEditStudentFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/saveEditStudentFragment"
+        android:name="com.omrsheetscanner.presentation.save_edit_student.SaveEditStudentFragment"
+        android:label="SaveEditStudentFragment">
+        <argument
+            android:name="student"
+            app:argType="com.omrsheetscanner.domain.model.StudentGrade"
+            app:nullable="false" />
     </fragment>
 </navigation>
