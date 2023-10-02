@@ -89,6 +89,10 @@
             android:name="myExam"
             app:argType="com.omrsheetscanner.domain.model.MyExam"
             app:nullable="false" />
+        <argument
+            android:name="matJson"
+            app:argType="string"
+            app:nullable="false" />
         <action
             android:id="@+id/action_previewFragment_to_saveEditStudentFragment"
             app:destination="@id/saveEditStudentFragment" />

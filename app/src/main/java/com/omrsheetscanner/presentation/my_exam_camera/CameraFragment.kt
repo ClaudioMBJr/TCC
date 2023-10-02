@@ -1,8 +1,9 @@
 package com.omrsheetscanner.presentation.my_exam_camera
 
 import android.Manifest.permission.CAMERA
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,16 +14,19 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.omrsheetscanner.common.Constants
+import com.google.android.material.snackbar.Snackbar
 import com.omrsheetscanner.common.Constants.COUNTOUR_IDX
 import com.omrsheetscanner.common.Constants.GREEN
 import com.omrsheetscanner.common.Constants.PERCENT_OF_PERIMETER
 import com.omrsheetscanner.common.Constants.SQUARE_POINTS
 import com.omrsheetscanner.common.Constants.THICKNESS_BOX
+import com.omrsheetscanner.common.MatConverter
 import com.omrsheetscanner.databinding.FragmentCameraBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.OpenCVLoader
-import org.opencv.android.Utils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -30,14 +34,12 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
-import java.io.File
-import java.io.FileOutputStream
 
 class CameraFragment : Fragment(),
     CameraBridgeViewBase.CvCameraViewListener2 {
 
     private var _binding: FragmentCameraBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding
 
     private val args: CameraFragmentArgs by navArgs()
 
@@ -47,14 +49,15 @@ class CameraFragment : Fragment(),
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted)
                 activateOpenCVCameraView()
-            else
-                requireActivity().finish()
+            else {
+                Snackbar.make(
+                    requireView(),
+                    "Você deve habilitar o acesso a câmera para continuar",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+                findNavController().popBackStack()
+            }
         }
-
-    init {
-        if (OpenCVLoader.initDebug())
-            Log.d("OpenCV", "OpenCV initialized")
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,12 +65,12 @@ class CameraFragment : Fragment(),
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
-        return binding.root
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.toolbar.setNavigationOnClickListener {
+        binding?.toolbar?.setNavigationOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
@@ -84,10 +87,10 @@ class CameraFragment : Fragment(),
         ) == PackageManager.PERMISSION_GRANTED
 
     private fun activateOpenCVCameraView() {
-        binding.javaCameraView.apply {
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        binding?.javaCameraView?.apply {
             setCameraPermissionGranted()
             setCvCameraViewListener(this@CameraFragment)
-            setMaxFrameSize(1280, 720)
             enableView()
         }
     }
@@ -144,9 +147,6 @@ class CameraFragment : Fragment(),
                 Log.d("Points", "topRight x = ${topRight.x} y = ${topRight.y}")
                 Log.d("Points", "bottomRight x = ${bottomRight.x} y = ${bottomRight.y}")
 
-                val rect = Rect(topLeft, bottomRight)
-                val region = frame.submat(rect)
-
                 val srcPoints = MatOfPoint2f(
                     topLeft,
                     bottomLeft,
@@ -175,35 +175,25 @@ class CameraFragment : Fragment(),
                     size
                 )
 
-                createBitmap(outputImage)
+                val matJson = MatConverter.matToJson(outputImage)
+
+                matJson?.let {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        findNavController().navigate(
+                            CameraFragmentDirections.actionCameraFragmentToPreviewFragment(
+                                myExam = args.myExam,
+                                matJson = matJson
+                            )
+                        )
+                    }
+                }
 
                 imageFound = true
 
-                findNavController().navigate(
-                    CameraFragmentDirections.actionCameraFragmentToPreviewFragment(
-                        args.myExam
-                    )
-                )
             }
         }
 
         return frame
-    }
-
-    private fun createBitmap(mat: Mat) {
-        val bitmap =
-            Bitmap.createBitmap(
-                mat.cols(),
-                mat.rows(),
-                Bitmap.Config.ARGB_8888
-            )
-        Utils.matToBitmap(mat, bitmap)
-
-        val bitmapFile = File(requireActivity().applicationContext.cacheDir, Constants.FILE_NAME)
-        val outputStream = FileOutputStream(bitmapFile)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        outputStream.flush()
-        outputStream.close()
     }
 
     private fun getContours(preProcessedFrame: Mat): MutableList<MatOfPoint> {
@@ -255,7 +245,7 @@ class CameraFragment : Fragment(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in 0.5..0.7 && boundingRect.area() > 8000)
+                if (aspectRatio in 0.25..0.3 && boundingRect.area() > 1000)
                     squares.add(contour)
             }
         }
@@ -263,14 +253,22 @@ class CameraFragment : Fragment(),
         return squares
     }
 
+    override fun onPause() {
+        super.onPause()
+        binding?.javaCameraView?.disableView()
+    }
+
     override fun onResume() {
         super.onResume()
+        OpenCVLoader.initDebug()
         imageFound = false
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.javaCameraView.disableView()
+        binding?.javaCameraView?.disableView()
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         _binding = null
     }
 

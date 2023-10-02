@@ -13,10 +13,30 @@ data class MyExam(
 ) : Serializable {
 
     fun getColumns() = when(questions) {
-        in 0..25 -> 1
-        in 26..50 -> 2
-        in 51..75 -> 3
-        else -> 4
+        10 -> 1
+        20 -> 1
+        30 -> 2
+        40 -> 2
+        50 -> 2
+        60 -> 3
+        70 -> 2
+        80 -> 4
+        90 -> 3
+        100 -> 4
+        else -> 0
+    }
+    fun getRows() = when(questions) {
+        10 -> 10
+        20 -> 20
+        30 -> 15
+        40 -> 20
+        50 -> 25
+        60 -> 20
+        70 -> 35
+        80 -> 20
+        90 -> 30
+        100 -> 25
+        else -> 0
     }
 }
 

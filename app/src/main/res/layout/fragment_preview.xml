@@ -33,7 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:adjustViewBounds="true"
-        android:background="@color/material_dynamic_neutral30"
         app:layout_constraintBottom_toTopOf="@id/btnCancel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

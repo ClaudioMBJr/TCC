@@ -20,7 +20,7 @@ class MyExamsFragment : Fragment() {
 
     private val myExamsViewModel: MyExamsViewModel by viewModels()
 
-    private lateinit var adapter: MyExamsAdapter
+    private var adapter: MyExamsAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +70,7 @@ class MyExamsFragment : Fragment() {
     }
 
     private fun filterList(newText: String?) {
-        adapter.getFilter().filter(newText)
+        adapter?.getFilter()?.filter(newText)
     }
 
     private fun showNoResultsLabel(isVisible: Boolean) {

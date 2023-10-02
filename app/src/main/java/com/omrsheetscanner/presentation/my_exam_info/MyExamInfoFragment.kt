@@ -25,7 +25,7 @@ class MyExamInfoFragment : Fragment() {
 
     private val args: MyExamInfoFragmentArgs by navArgs()
 
-    private lateinit var adapter: MyExamInfoAdapter
+    private var adapter: MyExamInfoAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -105,7 +105,7 @@ class MyExamInfoFragment : Fragment() {
     }
 
     private fun filterList(newText: String?) {
-        adapter.getFilter().filter(newText)
+        adapter?.getFilter()?.filter(newText)
     }
 
     private fun showNoResultsLabel(isVisible: Boolean) {

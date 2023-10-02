@@ -1,29 +1,24 @@
 package com.omrsheetscanner.presentation.my_exam_preview
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.common.Constants
 import com.omrsheetscanner.common.Constants.GREEN
-import com.omrsheetscanner.common.Constants.RED
+import com.omrsheetscanner.common.MatConverter
 import com.omrsheetscanner.databinding.FragmentPreviewBinding
 import org.opencv.android.Utils
-import org.opencv.core.Core
-import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
-import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 import org.opencv.imgproc.Imgproc.drawContours
-import java.io.File
-import java.io.FileInputStream
 
 class PreviewFragment : Fragment() {
 
@@ -31,13 +26,6 @@ class PreviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: PreviewFragmentArgs by navArgs()
-
-    private val row = 10
-    private val col = args.myExam.getColumns()
-    private val totalQuestions = args.myExam.questions
-    private val marksByQuestion = args.myExam.options
-    private val correctAnswer = args.myExam.examAnswers
-    private val marksByLine = marksByQuestion * col
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,15 +50,16 @@ class PreviewFragment : Fragment() {
     }
 
     private fun reviewExam() {
-        try {
-            val bitmapFile =
-                File(requireActivity().applicationContext.cacheDir, Constants.FILE_NAME)
-            val inputStream = FileInputStream(bitmapFile)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream.close()
+        val row = args.myExam.getRows()
+        val col = args.myExam.getColumns()
+        val totalQuestions = args.myExam.questions
+        val marksByQuestion = args.myExam.options
+        val correctAnswer = args.myExam.examAnswers
+        val marksByLine = marksByQuestion * col
 
-            val mat = Mat()
-            Utils.bitmapToMat(bitmap, mat)
+        try {
+            val tempImg = MatConverter.matFromJson(args.matJson)
+            val mat = tempImg.clone()
 
             val gray = preProcessFrame(mat)
 
@@ -82,101 +71,104 @@ class PreviewFragment : Fragment() {
                 val boundingRect = Imgproc.boundingRect(it)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (boundingRect.area() > 800.0 && aspectRatio in 0.9..1.2)
+                if (aspectRatio > 1.6)
                     bubbles.add(it)
-            }
-
-            //Cria uma lista com cada linha
-            val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(marksByLine)
-
-            val questions = mutableListOf<List<MatOfPoint>>()
-
-            //Adiciona na lista questions agrupamentos de 5 retirados de cada linha
-            lines.forEach { line ->
-                val lineBySector =
-                    line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
-                lineBySector.forEach { question ->
-                    questions.add(question)
-                }
-            }
-
-            if (questions.size != totalQuestions)
-                throw Exception()
-
-            val sortedQuestions = mutableListOf<List<MatOfPoint>>()
-
-            //Ordena a matrix
-            for (i in 0 until col) {
-                for (j in 0 until row) {
-                    sortedQuestions.add(questions[(j * col) + i])
-                }
-            }
-
-            val userCorrectAnswer = mutableListOf<MatOfPoint>()
-            val userWrongAnswer = mutableListOf<MatOfPoint>()
-
-            sortedQuestions.forEachIndexed { indexQuestion, question ->
-                var userAnswer: MatOfPoint? = null
-                kotlin.run breaker@{
-                    question.forEachIndexed { index, mark ->
-                        val markContour = mutableListOf(mark)
-
-                        val mask = Mat.zeros(gray.size(), CvType.CV_8UC1)
-                        drawContours(mask, markContour, -1, Scalar(255.0), -1)
-
-                        val maskedImage = Mat()
-                        Core.bitwise_and(gray, mask, maskedImage)
-
-                        val total = Core.countNonZero(maskedImage)
-
-                        if (total > 800) {
-                            if (userAnswer == null) {
-                                userAnswer = mark
-                                if (index == correctAnswer[indexQuestion])
-                                    userCorrectAnswer.add(mark)
-                                else userWrongAnswer.add(mark)
-                            } else {
-                                question.forEach {
-                                    userCorrectAnswer.remove(it)
-                                    userWrongAnswer.remove(it)
-                                }
-                                return@breaker
-                            }
-                        }
-                    }
-                }
-                userAnswer = null
             }
 
             drawContours(
                 mat,
-                userCorrectAnswer,
+                bubbles,
                 Constants.COUNTOUR_IDX,
                 GREEN,
                 Constants.THICKNESS_BOX
             )
 
-            drawContours(
-                mat,
-                userWrongAnswer,
-                Constants.COUNTOUR_IDX,
-                RED,
-                Constants.THICKNESS_BOX
-            )
-
+//            //Cria uma lista com cada linha
+//            val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(marksByLine)
+//
+//            val questions = mutableListOf<List<MatOfPoint>>()
+//
+//            //Adiciona na lista questions agrupamentos de 5 retirados de cada linha
+//            lines.forEach { line ->
+//                val lineBySector =
+//                    line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
+//                lineBySector.forEach { question ->
+//                    questions.add(question)
+//                }
+//            }
+//
+//            if (questions.size != totalQuestions)
+//                throw Exception()
+//
+//            val sortedQuestions = mutableListOf<List<MatOfPoint>>()
+//
+//            //Ordena a matrix
+//            for (i in 0 until col - 1) {
+//                for (j in 0 until row) {
+//                    sortedQuestions.add(questions[(j * col) + i])
+//                }
+//            }
+//
+//            val userCorrectAnswer = mutableListOf<MatOfPoint>()
+//            val userWrongAnswer = mutableListOf<MatOfPoint>()
+//
+//            sortedQuestions.forEachIndexed { indexQuestion, question ->
+//                var userAnswer: MatOfPoint? = null
+//                kotlin.run breaker@{
+//                    question.forEachIndexed { index, mark ->
+//                        val markContour = mutableListOf(mark)
+//
+//                        val mask = Mat.zeros(gray.size(), CvType.CV_8UC1)
+//                        drawContours(mask, markContour, -1, Scalar(255.0), -1)
+//
+//                        val maskedImage = Mat()
+//                        Core.bitwise_and(gray, mask, maskedImage)
+//
+//                        val total = Core.countNonZero(maskedImage)
+//
+//                        if (total > 800) {
+//                            if (userAnswer == null) {
+//                                userAnswer = mark
+//                                if (index == correctAnswer[indexQuestion])
+//                                    userCorrectAnswer.add(mark)
+//                                else userWrongAnswer.add(mark)
+//                            } else {
+//                                question.forEach {
+//                                    userCorrectAnswer.remove(it)
+//                                    userWrongAnswer.remove(it)
+//                                }
+//                                return@breaker
+//                            }
+//                        }
+//                    }
+//                }
+//                userAnswer = null
+//            }
+//
+//            drawContours(
+//                mat,
+//                userCorrectAnswer,
+//                Constants.COUNTOUR_IDX,
+//                GREEN,
+//                Constants.THICKNESS_BOX
+//            )
+//
+//            drawContours(
+//                mat,
+//                userWrongAnswer,
+//                Constants.COUNTOUR_IDX,
+//                RED,
+//                Constants.THICKNESS_BOX
+//            )
+//
             val processedBitmap = getFinalBitMap(mat)
 
             binding.preview.setImageBitmap(processedBitmap)
 
         } catch (e: Exception) {
+            Log.e("ERRO", e.printStackTrace().toString())
             e.printStackTrace()
-            AlertDialog.Builder(requireContext())
-                .setMessage("Imagem inválida")
-                .setPositiveButton(
-                    "OK"
-                ) { _, _ -> requireActivity().finish() }
-                .create()
-                .show()
+            Toast.makeText(requireContext(), "Imagem inválida", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -224,7 +216,6 @@ class PreviewFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        requireActivity().applicationContext.cacheDir.listFiles()?.forEach { it.delete() }
         _binding = null
     }
 
