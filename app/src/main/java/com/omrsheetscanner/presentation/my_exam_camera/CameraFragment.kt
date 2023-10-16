@@ -177,6 +177,8 @@ class CameraFragment : Fragment(),
 
                 val matJson = MatConverter.matToJson(outputImage)
 
+                imageFound = true
+
                 matJson?.let {
                     CoroutineScope(Dispatchers.Main).launch {
                         findNavController().navigate(
@@ -188,7 +190,6 @@ class CameraFragment : Fragment(),
                     }
                 }
 
-                imageFound = true
 
             }
         }
