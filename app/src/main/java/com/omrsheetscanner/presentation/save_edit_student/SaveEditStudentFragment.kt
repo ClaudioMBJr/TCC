@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.databinding.FragmentSaveEditStudentBinding
+import com.omrsheetscanner.domain.model.StudentGrade
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +21,7 @@ class SaveEditStudentFragment : Fragment() {
     private val args: SaveEditStudentFragmentArgs by navArgs()
 
     private val saveEditStudentViewModel: SaveEditStudentViewModel by viewModels()
-    
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,6 +41,11 @@ class SaveEditStudentFragment : Fragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
+        binding.btnSave.setOnClickListener {
+            saveEditStudentViewModel.saveStudent(
+                StudentGrade(name = args.student.name, grade = args.student.grade)
+            )
+        }
         binding.btnCancel.setOnClickListener {
             findNavController().popBackStack()
         }

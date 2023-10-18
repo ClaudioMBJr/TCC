@@ -39,8 +39,7 @@
         <action
             android:id="@+id/action_selectCorrectAnswersFragment_to_myExamInfoFragment"
             app:destination="@id/myExamInfoFragment"
-            app:popUpTo="@id/myExamsFragment"
-            app:popUpToInclusive="true" />
+            app:popUpTo="@id/fragmentHome" />
     </fragment>
     <fragment
         android:id="@+id/myExamsFragment"

@@ -246,7 +246,7 @@ class CameraFragment : Fragment(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in 0.25..0.3 && boundingRect.area() > 1000)
+                if (aspectRatio in 0.25..0.35 && boundingRect.area() in 1900.0..2200.0)
                     squares.add(contour)
             }
         }

@@ -77,6 +77,11 @@ class MyExamsFragment : Fragment() {
         binding.textNoExamsSearch.isVisible = isVisible
     }
 
+    override fun onResume() {
+        super.onResume()
+        myExamsViewModel.getAllExams()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -15,6 +16,7 @@ import com.omrsheetscanner.common.Constants.GREEN
 import com.omrsheetscanner.common.Constants.RED
 import com.omrsheetscanner.common.MatConverter
 import com.omrsheetscanner.databinding.FragmentPreviewBinding
+import com.omrsheetscanner.domain.model.StudentGrade
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -30,6 +32,8 @@ class PreviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: PreviewFragmentArgs by navArgs()
+
+    private var studentGrade : Double = 0.0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,6 +55,10 @@ class PreviewFragment : Fragment() {
         binding.btnCancel.setOnClickListener {
             findNavController().popBackStack()
         }
+
+        binding.btnSave.setOnClickListener {
+            findNavController().navigate(PreviewFragmentDirections.actionPreviewFragmentToSaveEditStudentFragment(StudentGrade(name = "", grade = studentGrade.toString())))
+        }
     }
 
     private fun reviewExam() {
@@ -64,6 +72,8 @@ class PreviewFragment : Fragment() {
         try {
             val tempImg = MatConverter.matFromJson(args.matJson)
             val mat = tempImg.clone()
+
+            binding.preview.setImageBitmap(getFinalBitMap(mat))
 
             val gray = preProcessFrame(mat)
 
@@ -170,7 +180,10 @@ class PreviewFragment : Fragment() {
 
             val processedBitmap = getFinalBitMap(mat)
 
+            studentGrade = ((userCorrectAnswer.size * 100) / args.myExam.maxScore).toDouble()
+
             binding.preview.setImageBitmap(processedBitmap)
+            binding.progress.isVisible = false
 
         } catch (e: Exception) {
             findNavController().popBackStack()

@@ -18,11 +18,7 @@ class MyExamsViewModel @Inject constructor(private val getExamsUseCase: GetExams
     private val _myExams: MutableLiveData<List<MyExam>> = MutableLiveData()
     val myExams: LiveData<List<MyExam>> = _myExams
 
-    init {
-        getAllExams()
-    }
-
-    private fun getAllExams() {
+    fun getAllExams() {
         viewModelScope.launch(Dispatchers.IO) {
             _myExams.postValue(getExamsUseCase())
         }

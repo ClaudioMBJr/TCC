@@ -13,7 +13,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MyExamInfoViewModel @Inject constructor(private val getStudentsUseCase: GetStudentsUseCase, private val deleteExamUseCase: DeleteExamUseCase) :
+class MyExamInfoViewModel @Inject constructor(
+    private val getStudentsUseCase: GetStudentsUseCase,
+    private val deleteExamUseCase: DeleteExamUseCase
+) :
     ViewModel() {
 
     private val _students: MutableLiveData<List<StudentGrade>> = MutableLiveData()
@@ -22,13 +25,16 @@ class MyExamInfoViewModel @Inject constructor(private val getStudentsUseCase: Ge
     init {
         getStudents()
     }
+
     private fun getStudents() {
         viewModelScope.launch(Dispatchers.IO) {
             _students.postValue(getStudentsUseCase())
         }
     }
 
-    fun deleteExam(examId : Int) {
-        deleteExamUseCase.invoke(examId)
+    fun deleteExam(examId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteExamUseCase.invoke(examId)
+        }
     }
 }
