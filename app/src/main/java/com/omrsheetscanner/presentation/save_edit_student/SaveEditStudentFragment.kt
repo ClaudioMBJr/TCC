@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.omrsheetscanner.databinding.FragmentSaveEditStudentBinding
-import com.omrsheetscanner.domain.model.StudentGrade
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -43,7 +42,15 @@ class SaveEditStudentFragment : Fragment() {
 
         binding.btnSave.setOnClickListener {
             saveEditStudentViewModel.saveStudent(
-                StudentGrade(name = args.student.name, grade = args.student.grade)
+                args.student.copy(
+                    name = binding.studentNameEdit.text.toString(),
+                    grade = binding.studentGradeEdit.text.toString()
+                )
+            )
+            findNavController().navigate(
+                SaveEditStudentFragmentDirections.actionSaveEditStudentFragmentToMyExamInfoFragment(
+                    args.myExam
+                )
             )
         }
         binding.btnCancel.setOnClickListener {

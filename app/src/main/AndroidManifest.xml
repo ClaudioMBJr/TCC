@@ -50,12 +50,6 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.my_exam_preview.PreviewFragment" />
-        <activity
-            android:name=".presentation.my_exam_camera.CameraActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:exported="true"
-            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

@@ -9,8 +9,8 @@ class StudentRepository @Inject constructor(private val studentDao: StudentDao) 
     suspend fun saveStudent(student: Student) =
         studentDao.saveStudent(student)
 
-    fun getAllStudent() =
-        studentDao.getAllStudents()
+    fun getStudentsById(examId: Int) =
+        studentDao.getStudentsById(examId)
 
     fun deleteAll() = studentDao.deleteAll()
 }

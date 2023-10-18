@@ -22,13 +22,9 @@ class MyExamInfoViewModel @Inject constructor(
     private val _students: MutableLiveData<List<StudentGrade>> = MutableLiveData()
     val students: LiveData<List<StudentGrade>> = _students
 
-    init {
-        getStudents()
-    }
-
-    private fun getStudents() {
+    fun getStudents(myExamId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _students.postValue(getStudentsUseCase())
+            _students.postValue(getStudentsUseCase(myExamId))
         }
     }
 

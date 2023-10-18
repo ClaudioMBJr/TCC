@@ -37,9 +37,8 @@
             app:argType="com.omrsheetscanner.domain.model.MyExam"
             app:nullable="false" />
         <action
-            android:id="@+id/action_selectCorrectAnswersFragment_to_myExamInfoFragment"
-            app:destination="@id/myExamInfoFragment"
-            app:popUpTo="@id/fragmentHome" />
+            android:id="@+id/action_selectCorrectAnswersFragment_to_myExamsFragment"
+            app:destination="@id/myExamsFragment" />
     </fragment>
     <fragment
         android:id="@+id/myExamsFragment"
@@ -104,5 +103,14 @@
             android:name="student"
             app:argType="com.omrsheetscanner.domain.model.StudentGrade"
             app:nullable="false" />
+        <argument
+            android:name="myExam"
+            app:argType="com.omrsheetscanner.domain.model.MyExam"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_saveEditStudentFragment_to_myExamInfoFragment"
+            app:destination="@id/myExamInfoFragment"
+            app:popUpTo="@id/myExamInfoFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 </navigation>

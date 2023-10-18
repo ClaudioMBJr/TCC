@@ -13,9 +13,9 @@ interface StudentDao {
     suspend fun saveStudent(student: Student)
 
     @Query(
-        "SELECT * FROM student"
+        "SELECT * FROM student where examId = :myExamId"
     )
-    fun getAllStudents(): List<Student>
+    fun getStudentsById(myExamId : Int): List<Student>
 
     @Query("DELETE FROM student")
     fun deleteAll()

@@ -6,6 +6,6 @@ import javax.inject.Inject
 
 class GetStudentsUseCase @Inject constructor(private val studentRepository: StudentRepository) {
 
-    operator fun invoke() =
-        studentRepository.getAllStudent().map { it.toStudentGrade() }
+    operator fun invoke(myExamId: Int) =
+        studentRepository.getStudentsById(myExamId).map { it.toStudentGrade() }
 }

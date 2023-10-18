@@ -103,6 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
+                android:visibility="gone"
                 android:theme="@style/SearchViewTheme"
                 app:defaultQueryHint="@string/text_search_student"
                 app:queryBackground="@null"

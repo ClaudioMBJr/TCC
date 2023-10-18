@@ -51,7 +51,7 @@ class SelectCorrectAnswersFragment : Fragment() {
         binding.btnContinue.setOnClickListener {
             if (canContinue()) {
                 selectCorrectAnswersViewModel.saveExam(args.myExam.copy(examAnswers = adapter.selectedAnswers))
-                findNavController().navigate(SelectCorrectAnswersFragmentDirections.actionSelectCorrectAnswersFragmentToMyExamInfoFragment(selectCorrectAnswersViewModel.myExam))
+                findNavController().navigate(SelectCorrectAnswersFragmentDirections.actionSelectCorrectAnswersFragmentToMyExamsFragment())
             }
         }
     }

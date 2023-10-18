@@ -7,13 +7,17 @@ object StudentMapper {
 
     fun Student.toStudentGrade() =
         StudentGrade(
+            id = id,
             name = name,
-            grade = grade.toString()
+            grade = grade.toString(),
+            examId = examId
         )
 
     fun StudentGrade.toStudent() =
         Student(
+            id = id,
             name = name,
-            grade = grade.toDouble()
+            grade = grade.toDouble(),
+            examId = examId
         )
 }

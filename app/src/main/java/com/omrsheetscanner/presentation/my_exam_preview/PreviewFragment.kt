@@ -33,7 +33,7 @@ class PreviewFragment : Fragment() {
 
     private val args: PreviewFragmentArgs by navArgs()
 
-    private var studentGrade : Double = 0.0
+    private var studentGrade: Double = 0.0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +57,17 @@ class PreviewFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            findNavController().navigate(PreviewFragmentDirections.actionPreviewFragmentToSaveEditStudentFragment(StudentGrade(name = "", grade = studentGrade.toString())))
+            findNavController().navigate(
+                PreviewFragmentDirections.actionPreviewFragmentToSaveEditStudentFragment(
+                    student = StudentGrade(
+                        id = 0,
+                        name = "",
+                        grade = studentGrade.toString(),
+                        examId = args.myExam.id
+                    ),
+                    myExam = args.myExam
+                )
+            )
         }
     }
 
@@ -180,7 +190,7 @@ class PreviewFragment : Fragment() {
 
             val processedBitmap = getFinalBitMap(mat)
 
-            studentGrade = ((userCorrectAnswer.size * 100) / args.myExam.maxScore).toDouble()
+            studentGrade = ((userCorrectAnswer.size * args.myExam.maxScore) / args.myExam.questions).toDouble()
 
             binding.preview.setImageBitmap(processedBitmap)
             binding.progress.isVisible = false
@@ -188,7 +198,11 @@ class PreviewFragment : Fragment() {
         } catch (e: Exception) {
             findNavController().popBackStack()
             e.printStackTrace()
-            Toast.makeText(requireContext(), "Não foi possível processar a imagem", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Não foi possível processar a imagem",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

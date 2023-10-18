@@ -81,7 +81,14 @@ class MyExamInfoFragment : Fragment() {
         myExamsInfoViewModel.students.observe(viewLifecycleOwner) {
             adapter = MyExamInfoAdapter(
                 students = it.toMutableList(),
-                onStudentClicked = {},
+                onStudentClicked = {
+                    findNavController().navigate(
+                        MyExamInfoFragmentDirections.actionMyExamInfoFragmentToSaveEditStudentFragment(
+                            student = it,
+                            myExam = args.myExam
+                        )
+                    )
+                },
                 showNoResultsMessage = {
                     showNoResultsLabel(it)
                 })
@@ -116,6 +123,10 @@ class MyExamInfoFragment : Fragment() {
         PDFConverter().createPdf(requireContext(), requireActivity(), args.myExam)
     }
 
+    override fun onResume() {
+        super.onResume()
+        myExamsInfoViewModel.getStudents(args.myExam.id)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
