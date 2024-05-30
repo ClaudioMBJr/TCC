@@ -38,6 +38,7 @@
             app:nullable="false" />
         <action
             android:id="@+id/action_selectCorrectAnswersFragment_to_myExamsFragment"
+            app:popUpTo="@id/fragmentHome"
             app:destination="@id/myExamsFragment" />
     </fragment>
     <fragment

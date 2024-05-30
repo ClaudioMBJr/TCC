@@ -109,8 +109,7 @@ class PreviewFragment : Fragment() {
 
             //Adiciona na lista questions agrupamentos de 5 retirados de cada linha
             lines.forEach { line ->
-                val lineBySector =
-                    line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
+                val lineBySector = line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
                 lineBySector.forEach { question ->
                     questions.add(question)
                 }
