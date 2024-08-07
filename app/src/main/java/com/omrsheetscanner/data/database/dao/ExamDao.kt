@@ -9,9 +9,7 @@ import com.omrsheetscanner.data.database.entities.Exam
 @Dao
 interface ExamDao {
 
-    @Query(
-        "SELECT * FROM exam"
-    )
+    @Query("SELECT * FROM exam")
     fun getAllExams(): List<Exam>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

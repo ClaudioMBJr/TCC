@@ -89,6 +89,17 @@ class PreviewFragment : Fragment() {
 
             val contours = getContours(gray)
 
+            val countorsClone = mat.clone()
+
+            drawContours(
+                countorsClone,
+                contours,
+                Constants.COUNTOUR_IDX,
+                GREEN,
+                Constants.THICKNESS_BOX
+            )
+            saveAsFile(countorsClone, "contoursStep2")
+
             val bubbles = mutableListOf<MatOfPoint>()
 
             contours.forEach {
@@ -102,6 +113,17 @@ class PreviewFragment : Fragment() {
                 }
             }
 
+            val bubblesClone = mat.clone()
+            drawContours(
+                bubblesClone,
+                bubbles,
+                Constants.COUNTOUR_IDX,
+                GREEN,
+                Constants.THICKNESS_BOX
+            )
+            saveAsFile(bubblesClone, "bubblesStep2")
+
+
             //Cria uma lista com cada linha
             val lines = bubbles.sortedBy { Imgproc.boundingRect(it).y }.chunked(marksByLine)
 
@@ -109,7 +131,8 @@ class PreviewFragment : Fragment() {
 
             //Adiciona na lista questions agrupamentos de 5 retirados de cada linha
             lines.forEach { line ->
-                val lineBySector = line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
+                val lineBySector =
+                    line.sortedBy { Imgproc.boundingRect(it).x }.chunked(marksByQuestion)
                 lineBySector.forEach { question ->
                     questions.add(question)
                 }
@@ -137,6 +160,7 @@ class PreviewFragment : Fragment() {
 
             sortedQuestions.forEachIndexed { indexQuestion, question ->
                 var userAnswer: MatOfPoint? = null
+                Log.d("Correct question", correctAnswer[indexQuestion].toString())
                 kotlin.run breaker@{
                     question.forEachIndexed { index, mark ->
                         val correctIndex = index + 1
@@ -153,7 +177,7 @@ class PreviewFragment : Fragment() {
                         if (total > 800) {
                             if (userAnswer == null) {
                                 userAnswer = mark
-                                if (correctIndex == correctAnswer[indexQuestion]) {
+                                if (correct Index == correctAnswer[indexQuestion]) {
                                     userCorrectAnswer.add(mark)
                                 } else {
                                     userWrongAnswer.add(mark)
@@ -187,15 +211,18 @@ class PreviewFragment : Fragment() {
                 Constants.THICKNESS_BOX
             )
 
+            saveAsFile(mat, "final")
             val processedBitmap = getFinalBitMap(mat)
 
-            studentGrade = ((userCorrectAnswer.size * args.myExam.maxScore) / args.myExam.questions).toDouble()
+            studentGrade =
+                ((userCorrectAnswer.size * args.myExam.maxScore) / args.myExam.questions).toDouble()
 
             binding.preview.setImageBitmap(processedBitmap)
             binding.progress.isVisible = false
 
         } catch (e: Exception) {
             findNavController().popBackStack()
+            Log.e("ERRO", e.printStackTrace().toString())
             e.printStackTrace()
             Toast.makeText(
                 requireContext(),
@@ -203,6 +230,23 @@ class PreviewFragment : Fragment() {
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    private fun saveAsFile(grayMat: Mat, name: String) {
+//        val bitmap = Bitmap.createBitmap(grayMat.cols(), grayMat.rows(), Bitmap.Config.RGB_565);
+//        Utils.matToBitmap(grayMat, bitmap)
+//
+//        val file = File(requireContext().cacheDir, "$name.jpg");
+//        file.createNewFile();
+//
+//        val byteArrayOutputStream = ByteArrayOutputStream()
+//        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+//        val bitmapdata = byteArrayOutputStream.toByteArray()
+//
+//        val fos = FileOutputStream(file)
+//        fos.write(bitmapdata);
+//        fos.flush()
+//        fos.close()
     }
 
     private fun getFinalBitMap(mat: Mat): Bitmap {
@@ -221,6 +265,8 @@ class PreviewFragment : Fragment() {
         val grayMat = Mat()
         Imgproc.cvtColor(subFrame, grayMat, Imgproc.COLOR_BGR2GRAY)
 
+        saveAsFile(grayMat, "grayStep2")
+
         val thresh = Mat()
         Imgproc.threshold(
             grayMat,
@@ -230,6 +276,7 @@ class PreviewFragment : Fragment() {
             (Imgproc.THRESH_BINARY_INV or Imgproc.THRESH_OTSU)
         )
 
+        saveAsFile(thresh, "threshStep2")
         return thresh
     }
 

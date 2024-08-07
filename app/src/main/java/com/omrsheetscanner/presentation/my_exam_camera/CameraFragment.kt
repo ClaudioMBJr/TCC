@@ -4,6 +4,7 @@ import android.Manifest.permission.CAMERA
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.OpenCVLoader
+import org.opencv.android.Utils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -34,6 +36,9 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 class CameraFragment : Fragment(),
     CameraBridgeViewBase.CvCameraViewListener2 {
@@ -105,6 +110,7 @@ class CameraFragment : Fragment(),
         val frame = inputFrame.rgba()
 
         if (!imageFound) {
+            saveAsFile(frame, "initial")
 
             val preProcessedFrame = preProcessFrame(frame)
 
@@ -121,6 +127,25 @@ class CameraFragment : Fragment(),
             )
 
             if (squares.size == 4) {
+                val countorsClone = frame.clone()
+                Imgproc.drawContours(
+                    countorsClone,
+                    contours,
+                    COUNTOUR_IDX,
+                    GREEN,
+                    THICKNESS_BOX
+                )
+                saveAsFile(countorsClone, "contoursStep1")
+
+                Imgproc.drawContours(
+                    frame,
+                    squares,
+                    COUNTOUR_IDX,
+                    GREEN,
+                    THICKNESS_BOX
+                )
+
+                saveAsFile(frame, "squaresStep1")
 
                 val scrRects = mutableListOf<Rect>().apply {
                     add(Imgproc.boundingRect(squares[0]))
@@ -175,6 +200,8 @@ class CameraFragment : Fragment(),
                     size
                 )
 
+                saveAsFile(outputImage, "perspectiveStep1")
+
                 val matJson = MatConverter.matToJson(outputImage)
 
                 imageFound = true
@@ -188,6 +215,7 @@ class CameraFragment : Fragment(),
                             )
                         )
                     }
+
                 }
 
 
@@ -212,15 +240,35 @@ class CameraFragment : Fragment(),
     private fun preProcessFrame(subFrame: Mat): Mat {
         val grayMat = Mat()
         Imgproc.cvtColor(subFrame, grayMat, Imgproc.COLOR_BGR2GRAY)
+        saveAsFile(grayMat, "grayStep1")
 
         val thresh = Mat()
         Imgproc.threshold(grayMat, thresh, 100.0, 255.0, Imgproc.THRESH_BINARY)
+        saveAsFile(thresh, "threshStep1")
 
         val kernel = Mat.ones(5, 5, CvType.CV_8UC1)
         val closedImage = Mat()
         Imgproc.morphologyEx(thresh, closedImage, Imgproc.MORPH_CLOSE, kernel)
+        saveAsFile(closedImage, "morphologyStep1")
 
         return closedImage
+    }
+
+    private fun saveAsFile(grayMat: Mat, name: String) {
+//        val bitmap = Bitmap.createBitmap(grayMat.cols(), grayMat.rows(), Bitmap.Config.RGB_565);
+//        Utils.matToBitmap(grayMat, bitmap)
+//
+//        val file = File(requireContext().cacheDir, "$name.jpg");
+//        file.createNewFile();
+//
+//        val byteArrayOutputStream = ByteArrayOutputStream()
+//        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+//        val bitmapdata = byteArrayOutputStream.toByteArray()
+//
+//        val fos = FileOutputStream(file)
+//        fos.write(bitmapdata);
+//        fos.flush()
+//        fos.close()
     }
 
     private fun findSquares(
@@ -246,7 +294,7 @@ class CameraFragment : Fragment(),
                 val boundingRect = Imgproc.boundingRect(contour)
                 val aspectRatio = boundingRect.width.toDouble() / boundingRect.height.toDouble()
 
-                if (aspectRatio in 0.25..0.35 && boundingRect.area() in 1900.0..2200.0)
+                if (aspectRatio in 0.25..0.35 && boundingRect.area() in 1400.0..2200.0)
                     squares.add(contour)
             }
         }
